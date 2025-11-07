@@ -28,6 +28,20 @@ void AFloatingActor::BeginPlay()
 void AFloatingActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	BodyMesh->AddRelativeLocation(DeltaTime * Speed *FVector::UpVector);
+	if(Updown)
+	{
+		BodyMesh->AddRelativeLocation(DeltaTime * Speed *FVector::UpVector);
+		if(BodyMesh->GetRelativeLocation().Z >= MoveHeight)
+			Updown = false;
+	}
+	else
+	{
+		BodyMesh->AddRelativeLocation(DeltaTime * Speed *FVector::DownVector);
+		if (BodyMesh->GetRelativeLocation().Z <= 50.0f)
+			Updown = true;
+	}
+
+	BodyMesh->AddRelativeRotation(DeltaTime * SpinSpeed *FRotator(0,1,0));
+		
 }
 

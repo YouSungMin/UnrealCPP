@@ -26,7 +26,9 @@ public:
 public:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	float Speed = 100.0f;
-
+	float MoveHeight = 300.0f;
+	float SpinSpeed = 100.0f;
+	bool Updown = true;
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> BodyMesh = nullptr;
