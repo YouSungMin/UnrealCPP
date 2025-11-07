@@ -24,12 +24,22 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 public:
+	//이동 속도
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	float Speed = 100.0f;
+
+	//최대로 올라갈 높이
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float MoveHeight = 300.0f;
-	float SpinSpeed = 100.0f;
+
+	//회전 속도
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float SpinSpeed = 360.0f;
 	bool Updown = true;
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> BodyMesh = nullptr;
+
+	//누적 시간
+	float ElapsedTime = 0.0f;
 };

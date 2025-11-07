@@ -28,20 +28,29 @@ void AFloatingActor::BeginPlay()
 void AFloatingActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if(Updown)
-	{
-		BodyMesh->AddRelativeLocation(DeltaTime * Speed *FVector::UpVector);
-		if(BodyMesh->GetRelativeLocation().Z >= MoveHeight)
-			Updown = false;
-	}
-	else
-	{
-		BodyMesh->AddRelativeLocation(DeltaTime * Speed *FVector::DownVector);
-		if (BodyMesh->GetRelativeLocation().Z <= 50.0f)
-			Updown = true;
-	}
+	//if(Updown)
+	//{
+	//	BodyMesh->AddRelativeLocation(DeltaTime * Speed *FVector::UpVector);
+	//	if(BodyMesh->GetRelativeLocation().Z >= MoveHeight)
+	//		Updown = false;
+	//}
+	//else
+	//{
+	//	BodyMesh->AddRelativeLocation(DeltaTime * Speed *FVector::DownVector);
+	//	if (BodyMesh->GetRelativeLocation().Z <= 50.0f)
+	//		Updown = true;
+	//}
 
-	BodyMesh->AddRelativeRotation(DeltaTime * SpinSpeed *FRotator(0,1,0));
-		
+	//BodyMesh->AddRelativeRotation(DeltaTime * SpinSpeed *FRotator(0,1,0));
+
+	ElapsedTime += DeltaTime;
+	//UE_LOG(LogTemp,Log,TEXT("ElapsedTime : %.2f"),ElapsedTime)
+	float cosValue = FMath::Cos(ElapsedTime); // 1 -> -1 -> 1
+	cosValue += 1;			 // 2 -> 0 -> 2
+	cosValue *= 0.5f;		 // 1 -> 0 -> 1
+	cosValue = 1 - cosValue; // 0 -> 1 -> 0
+
+	BodyMesh->SetRelativeLocation(FVector(0,0,cosValue*MoveHeight));
+	BodyMesh->AddRelativeRotation(FRotator(0, SpinSpeed*DeltaTime, 0));
 }
 
