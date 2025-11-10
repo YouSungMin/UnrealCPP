@@ -4,7 +4,9 @@
 #include "Player/ActionCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
+
 
 // Sets default values
 AActionCharacter::AActionCharacter()
@@ -16,10 +18,17 @@ AActionCharacter::AActionCharacter()
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->TargetArmLength = 350.0f;
 	SpringArm->SocketOffset = FVector(0,0,250);
+	SpringArm->bUsePawnControlRotation = true;	//스프링암의 회전을 컨트롤러에 맞춤
 
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	PlayerCamera->SetupAttachment(SpringArm);
 	PlayerCamera->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
+
+	bUseControllerRotationYaw = false;	// 컨트롤러의 Yaw회전을 사용안함
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;	// 이동 방향으로 바라보게 회전
+	GetCharacterMovement()->RotationRate = FRotator(0,360,0);
+
 }
 
 // Called when the game starts or when spawned
