@@ -8,6 +8,8 @@
 #include "ActionCharacter.generated.h"
 
 class UInputAction;
+class UCameraComponent;
+class USpringArmComponent;
 
 UCLASS()
 class UNREALCPP_API AActionCharacter : public ACharacter
@@ -31,6 +33,13 @@ public:
 protected:
 	void OnMoveInput(const FInputActionValue& InValue);
 
+protected:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputAction> IA_Move;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<USpringArmComponent> SpringArm = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UCameraComponent> PlayerCamera = nullptr;
 };
