@@ -29,6 +29,7 @@ AActionCharacter::AActionCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = true;	// 이동 방향으로 바라보게 회전
 	GetCharacterMovement()->RotationRate = FRotator(0,360,0);
 
+
 }
 
 // Called when the game starts or when spawned
@@ -51,7 +52,7 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	UEnhancedInputComponent* enhanced = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 
-	if (enhanced)	//입력 컴포넌트가 향상된 입력 컴포넌트 일때
+	if (enhanced)	//입력 컴포넌트가 향상된 입력 컴포w넌트 일때
 	{
 		enhanced->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AActionCharacter::OnMoveInput);
 	}
@@ -59,11 +60,19 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 {
-	FVector2D inputDirection = InValue.Get<FVector2D>();
-	//UE_LOG(LogTemp,Log,TEXT("Dir : (%.1f, %.1f)",inputDirection.X,inputDirection.Y));
-	//UE_LOG(LogTemp, Log, TEXT("Dir : %s"), *inputDirection.ToString());
+	MyController = GetController();
+	if (MyController)
+	{
+		FRotator ControlRotation = MyController->GetControlRotation();
+		FRotator YawRotation(0,ControlRotation.Yaw,0);
+		FVector2D inputDirection = InValue.Get<FVector2D>();
 
-	FVector moveDirection(inputDirection.Y, inputDirection.X, 0.0f);
-	AddMovementInput(moveDirection);
+		FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		FVector ForwardDirection = YawRotation.Vector();
+		//UE_LOG(LogTemp, Log, TEXT("Dir : %s"), *inputDirection.ToString());
+		//FVector moveDirection(inputDirection.Y, inputDirection.X, 0.0f);
+		AddMovementInput(ForwardDirection, inputDirection.Y);
+		AddMovementInput(RightDirection, inputDirection.X);
+	}
 }
 

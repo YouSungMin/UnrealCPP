@@ -37,6 +37,7 @@ void AActionPlayerController::SetupInputComponent()
 void AActionPlayerController::OnLookInput(const FInputActionValue& InValue)
 {
 	FVector2D lookAxis = InValue.Get<FVector2D>();
+
 	AddYawInput(lookAxis.X);
 	AddPitchInput(lookAxis.Y);
 }
