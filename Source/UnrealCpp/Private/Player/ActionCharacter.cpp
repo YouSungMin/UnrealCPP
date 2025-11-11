@@ -43,7 +43,21 @@ void AActionCharacter::BeginPlay()
 void AActionCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	if (IsSprint)
+	{
+		Stamina -= RunStaminaCost;
+		if (StaminaCheck())
+		{
+			IsSprint = false;
+			SetWalkMode();
+		}
+	}
+	else
+	{
+		Stamina += StaminaRegenRate;
+		StaminaCheck();
+	}
+	UE_LOG(LogTemp, Log, TEXT("%.1f"),Stamina);
 }
 
 // Called to bind functionality to input
@@ -83,22 +97,49 @@ void AActionCharacter::OnRollInput(const FInputActionValue& InValue)
 {
 	if (AnimInstance.IsValid())
 	{
-		if (!AnimInstance->IsAnyMontagePlaying())
+		if (!AnimInstance->IsAnyMontagePlaying() && Stamina >= RollStaminaCost)
 		{
-			SetActorRotation(GetLastMovementInputVector().Rotation());
+			if(!GetLastMovementInputVector().IsNearlyZero())
+			{
+				SetActorRotation(GetLastMovementInputVector().Rotation());
+			}
 			PlayAnimMontage(RollMontage);
+			Stamina -= RollStaminaCost;
 		}
 	}
 }
 
 void AActionCharacter::SetWalkMode()
 {
+	IsSprint = false;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 void AActionCharacter::SetSprintMode()
 {
-	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	if (!GetLastMovementInputVector().IsNearlyZero())
+	{
+		IsSprint = true;
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	}
+}
+
+bool AActionCharacter::StaminaCheck()
+{
+	if (Stamina <= 0)
+	{
+		IsStaminaZero = true;
+		Stamina = 0;
+	}
+	else
+	{
+		IsStaminaZero = false;
+		if (Stamina >= MaxStamina)
+		{
+			Stamina = MaxStamina;
+		}
+	}
+	return IsStaminaZero;
 }
 
 

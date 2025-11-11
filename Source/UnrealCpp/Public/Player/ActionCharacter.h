@@ -43,6 +43,7 @@ protected:
 	// 달리기 모드 설정
 	void SetSprintMode();
 
+	bool StaminaCheck();
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USpringArmComponent> SpringArm = nullptr;
@@ -59,16 +60,34 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputAction> IA_Roll = nullptr;
 
+	// AnimMotage
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation|Montage")
+	TObjectPtr<UAnimMontage> RollMontage = nullptr;
+
 	// 속도
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Player|Movement")
 	float WalkSpeed = 600.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Player|Movement")
 	float SprintSpeed = 1200.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation|Montage")
-	TObjectPtr<UAnimMontage> RollMontage = nullptr;
+	//스테미너
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement")
+	float Stamina = 100.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement")
+	float MaxStamina = 100.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement")
+	float RunStaminaCost = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement")
+	float RollStaminaCost = 20.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement")
+	float StaminaRegenRate = 0.1f;
+
+
 private:
 	UPROPERTY()
 	TWeakObjectPtr<UAnimInstance> AnimInstance = nullptr;
 	
+	bool IsStaminaZero = false;
+	bool IsSprint = false;
+	bool IsRoll = false;
 };
