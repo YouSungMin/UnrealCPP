@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
-#include "PlayerAnimInstance.h"
 #include "ActionCharacter.generated.h"
 
 class UInputAction;
@@ -32,8 +31,14 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 protected:
+	// 이동 방향 입력 받기
 	void OnMoveInput(const FInputActionValue& InValue);
 
+	// 달리기 모드 설정
+	void SetSprintMode();
+
+	// 걷기 모드 설정
+	void SetWalkMode();
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USpringArmComponent> SpringArm = nullptr;
@@ -41,12 +46,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> PlayerCamera = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UPlayerAnimInstance> PlayerAnim = nullptr;
+	// Input Action
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input")
+	TObjectPtr<UInputAction> IA_Move = nullptr;
 
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category="Input")
-	TObjectPtr<UInputAction> IA_Move;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input")
+	TObjectPtr<UInputAction> IA_Sprint = nullptr;
 
-	//AController* MyController = nullptr;
+	// 속도
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Player|Movement")
+	float SprintSpeed = 1200.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Player|Movement")
+	float WalkSpeed = 600.0f;
 };

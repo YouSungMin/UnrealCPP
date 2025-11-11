@@ -24,8 +24,9 @@ AActionCharacter::AActionCharacter()
 	PlayerCamera->SetupAttachment(SpringArm);
 	PlayerCamera->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
 
-	bUseControllerRotationYaw = true;	// 컨트롤러의 Yaw회전을 사용함 -> 컨트롤러의 회전을 캐릭터에 적용
-	GetCharacterMovement()->RotationRate = FRotator(0,360,0);	// 이동 방향에 적용
+	bUseControllerRotationYaw = false;	// 컨트롤러의 Yaw회전을 사용안함
+	GetCharacterMovement()->bOrientRotationToMovement = true;	// 이동 방향으로 캐릭터 회전
+	GetCharacterMovement()->RotationRate = FRotator(0,360,0);	
 
 
 }
@@ -53,29 +54,35 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	if (enhanced)	//입력 컴포넌트가 향상된 입력 컴포w넌트 일때
 	{
 		enhanced->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AActionCharacter::OnMoveInput);
+		enhanced->BindActionValueLambda(IA_Sprint, ETriggerEvent::Started,
+			[this](const FInputActionValue& _) {
+				SetSprintMode();
+			});
+		enhanced->BindActionValueLambda(IA_Sprint, ETriggerEvent::Completed,
+			[this](const FInputActionValue& _) {
+				SetWalkMode();
+			});
 	}
 }
 
 void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 {
-	//MyController = GetController();
-	//if (MyController)
-	//{
-	//	FRotator ControlRotation = MyController->GetControlRotation();
-	//	FRotator YawRotation(0,ControlRotation.Yaw,0);
-	//	FVector2D inputDirection = InValue.Get<FVector2D>();
-
-	//	FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	//	FVector ForwardDirection = YawRotation.Vector();
-	//	//UE_LOG(LogTemp, Log, TEXT("Dir : %s"), *inputDirection.ToString());
-	//	AddMovementInput(ForwardDirection, inputDirection.Y);
-	//	AddMovementInput(RightDirection, inputDirection.X);
-	//}
 	FVector2D inputDirection = InValue.Get<FVector2D>();
 	FVector moveDirection(inputDirection.Y, inputDirection.X, 0.0f);
+	//UE_LOG(LogTemp, Log, TEXT("Dir : %s"), *inputDirection.ToString());
 	FQuat controlYawRotation = FQuat(FRotator(0,GetControlRotation().Yaw,0));
 	moveDirection = controlYawRotation.RotateVector(moveDirection);
 
 	AddMovementInput(moveDirection);
+}
+
+void AActionCharacter::SetSprintMode()
+{
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+}
+
+void AActionCharacter::SetWalkMode()
+{
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
