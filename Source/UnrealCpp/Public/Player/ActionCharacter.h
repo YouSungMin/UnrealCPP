@@ -34,15 +34,18 @@ protected:
 	// 이동 방향 입력 받기
 	void OnMoveInput(const FInputActionValue& InValue);
 
-	// 달리기 모드 설정
-	void SetSprintMode();
+	// 구르기 입력 받기
+	void OnRollInput(const FInputActionValue& InValue);
 
 	// 걷기 모드 설정
 	void SetWalkMode();
+
+	// 달리기 모드 설정
+	void SetSprintMode();
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USpringArmComponent> SpringArm = nullptr;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> PlayerCamera = nullptr;
 
@@ -53,10 +56,19 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputAction> IA_Sprint = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input")
+	TObjectPtr<UInputAction> IA_Roll = nullptr;
+
 	// 속도
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Player|Movement")
+	float WalkSpeed = 600.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Player|Movement")
 	float SprintSpeed = 1200.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Player|Movement")
-	float WalkSpeed = 600.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation|Montage")
+	TObjectPtr<UAnimMontage> RollMontage = nullptr;
+private:
+	UPROPERTY()
+	TWeakObjectPtr<UAnimInstance> AnimInstance = nullptr;
+	
 };
