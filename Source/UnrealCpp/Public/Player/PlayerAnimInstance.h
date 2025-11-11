@@ -14,15 +14,12 @@ class UNREALCPP_API UPlayerAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 protected:
-	virtual void NativeBeginPlay()override;
-	virtual void NativeUpdateAnimation(float DeltaTime) override;
+	virtual void NativeInitializeAnimation() override;
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<APawn> PlayerPawn;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<ACharacter>PlayerCharacter;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, category="Movement")
 	float Speed = 0.0f;
+private:
+	TWeakObjectPtr<const UPawnMovementComponent> OwnerMovementComponent = nullptr;
 };

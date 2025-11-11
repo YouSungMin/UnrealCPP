@@ -47,6 +47,6 @@ protected:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputAction> IA_Move;
 
-	AController* MyController = nullptr;
+	//AController* MyController = nullptr;
 
 };

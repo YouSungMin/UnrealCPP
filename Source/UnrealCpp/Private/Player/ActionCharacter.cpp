@@ -24,10 +24,8 @@ AActionCharacter::AActionCharacter()
 	PlayerCamera->SetupAttachment(SpringArm);
 	PlayerCamera->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
 
-	bUseControllerRotationYaw = false;	// 컨트롤러의 Yaw회전을 사용안함
-
-	GetCharacterMovement()->bOrientRotationToMovement = true;	// 이동 방향으로 바라보게 회전
-	GetCharacterMovement()->RotationRate = FRotator(0,360,0);
+	bUseControllerRotationYaw = true;	// 컨트롤러의 Yaw회전을 사용함 -> 컨트롤러의 회전을 캐릭터에 적용
+	GetCharacterMovement()->RotationRate = FRotator(0,360,0);	// 이동 방향에 적용
 
 
 }
@@ -60,19 +58,24 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 {
-	MyController = GetController();
-	if (MyController)
-	{
-		FRotator ControlRotation = MyController->GetControlRotation();
-		FRotator YawRotation(0,ControlRotation.Yaw,0);
-		FVector2D inputDirection = InValue.Get<FVector2D>();
+	//MyController = GetController();
+	//if (MyController)
+	//{
+	//	FRotator ControlRotation = MyController->GetControlRotation();
+	//	FRotator YawRotation(0,ControlRotation.Yaw,0);
+	//	FVector2D inputDirection = InValue.Get<FVector2D>();
 
-		FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		FVector ForwardDirection = YawRotation.Vector();
-		//UE_LOG(LogTemp, Log, TEXT("Dir : %s"), *inputDirection.ToString());
-		//FVector moveDirection(inputDirection.Y, inputDirection.X, 0.0f);
-		AddMovementInput(ForwardDirection, inputDirection.Y);
-		AddMovementInput(RightDirection, inputDirection.X);
-	}
+	//	FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	//	FVector ForwardDirection = YawRotation.Vector();
+	//	//UE_LOG(LogTemp, Log, TEXT("Dir : %s"), *inputDirection.ToString());
+	//	AddMovementInput(ForwardDirection, inputDirection.Y);
+	//	AddMovementInput(RightDirection, inputDirection.X);
+	//}
+	FVector2D inputDirection = InValue.Get<FVector2D>();
+	FVector moveDirection(inputDirection.Y, inputDirection.X, 0.0f);
+	FQuat controlYawRotation = FQuat(FRotator(0,GetControlRotation().Yaw,0));
+	moveDirection = controlYawRotation.RotateVector(moveDirection);
+
+	AddMovementInput(moveDirection);
 }
 
