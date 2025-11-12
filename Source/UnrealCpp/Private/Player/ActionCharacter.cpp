@@ -39,7 +39,16 @@ void AActionCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AnimInstance = GetMesh()->GetAnimInstance(); // ABP 가져오기
+	if (GetMesh())
+	{
+		AnimInstance = GetMesh()->GetAnimInstance(); // ABP 가져오기
+	}
+
+	if (Resource)
+	{
+		Resource->OnStaminaEmpty.AddDynamic(this, &AActionCharacter::SetWalkMode);
+	}
+
 	bIsSprint = false;
 }
 
