@@ -42,8 +42,11 @@ protected:
 
 	// 달리기 모드 설정
 	void SetSprintMode();
+private:
+	void StaminaRegenTimerSet();
 
-	bool StaminaCheck();
+	void StaminaRegenPerTick();
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USpringArmComponent> SpringArm = nullptr;
@@ -70,24 +73,48 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Player|Movement")
 	float SprintSpeed = 1200.0f;
 
-	//스테미너
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement")
-	float Stamina = 100.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement")
-	float MaxStamina = 100.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement")
-	float RunStaminaCost = 0.5f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement")
-	float RollStaminaCost = 20.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement")
-	float StaminaRegenRate = 0.1f;
+	// 현재 스테미너
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Resource")
+	float CurrentStamina = 100.0f;
 
+	// 최대 스테미너
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Resource")
+	float MaxStamina = 100.0f;
+
+	// 달리기 상태일 때 초당 스테미너 비용
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Resource")
+	float SprintStaminaCost = 20.0f;
+
+	// 구르기를 하기 위해 스테미너 비용
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Resource")
+	float RollStaminaCost = 50.0f;
+
+	// 스테미너 리젠 시간
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Resource")
+	float StaminaRegenCoolTime = 3.0f;
+
+	// 스테미너 초당 회복량
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Resource")
+	float StaminaRegenAmount = 50.0f;
+
+	// 스테미너 틱당 회복량
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Resource")
+	float StaminaRegenAmountByTick = 10.0f;
+
+	// 스테미너 틱당,최대치의 % 회복량
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Resource")
+	float StaminaRegenRatePerTick = 0.1f;
+
+	// 플레이어가 뛰고있는 상태 표시 변수
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|State")
+	bool bIsSprint = false;
 
 private:
 	UPROPERTY()
 	TWeakObjectPtr<UAnimInstance> AnimInstance = nullptr;
 	
-	bool IsStaminaZero = false;
-	bool IsSprint = false;
-	bool IsRoll = false;
+	float TimeSinceLastStaminaUse = 0.0f;
+	FTimerHandle StaminaCoolTimer;
+	FTimerHandle StaminaRegenTimer;
+	bool bRegenStamina = false;
 };

@@ -36,28 +36,43 @@ void AActionCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AnimInstance = GetMesh()->GetAnimInstance();	// ABP 가져오기
+	AnimInstance = GetMesh()->GetAnimInstance(); // ABP 가져오기
+	
+	CurrentStamina = MaxStamina; // 시작 할 때 최대치로 리셋
+	bIsSprint = false;
 }
 
 // Called every frame
 void AActionCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (IsSprint)
+
+	// 타이머로 조건만 설정하는 경우
+	//if (bRegenStamina)
+	//{
+	//	CurrentStamina += StaminaRegenAmount * DeltaTime;
+
+	//	if (CurrentStamina > MaxStamina)
+	//	{
+	//		bRegenStamina = false;
+	//		CurrentStamina = MaxStamina;
+	//	}
+	//}
+
+
+	if (bIsSprint)
 	{
-		Stamina -= RunStaminaCost;
-		if (StaminaCheck())
+		CurrentStamina -= SprintStaminaCost * DeltaTime;
+		//TimeSinceLastStaminaUse = 0;
+		StaminaRegenTimerSet();
+
+		if (CurrentStamina <= 0)
 		{
-			IsSprint = false;
+			CurrentStamina = 0.0f;
 			SetWalkMode();
 		}
 	}
-	else
-	{
-		Stamina += StaminaRegenRate;
-		StaminaCheck();
-	}
-	UE_LOG(LogTemp, Log, TEXT("%.1f"),Stamina);
+	UE_LOG(LogTemp, Log, TEXT("%.1f"),CurrentStamina);
 }
 
 // Called to bind functionality to input
@@ -67,7 +82,7 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	UEnhancedInputComponent* enhanced = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 
-	if (enhanced)	//입력 컴포넌트가 향상된 입력 컴포w넌트 일때
+	if (enhanced)	//입력 컴포넌트가 향상된 입력 컴포넌트 일때
 	{
 		enhanced->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AActionCharacter::OnMoveInput);
 		enhanced->BindActionValueLambda(IA_Sprint, ETriggerEvent::Started,
@@ -97,21 +112,23 @@ void AActionCharacter::OnRollInput(const FInputActionValue& InValue)
 {
 	if (AnimInstance.IsValid())
 	{
-		if (!AnimInstance->IsAnyMontagePlaying() && Stamina >= RollStaminaCost)
+		if (!AnimInstance->IsAnyMontagePlaying() && CurrentStamina >= RollStaminaCost)
 		{
 			if(!GetLastMovementInputVector().IsNearlyZero())
 			{
 				SetActorRotation(GetLastMovementInputVector().Rotation());
 			}
+			CurrentStamina -= RollStaminaCost;
+			//TimeSinceLastStaminaUse = 0;
+			StaminaRegenTimerSet();
 			PlayAnimMontage(RollMontage);
-			Stamina -= RollStaminaCost;
 		}
 	}
 }
 
 void AActionCharacter::SetWalkMode()
 {
-	IsSprint = false;
+	bIsSprint = false;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
@@ -119,27 +136,43 @@ void AActionCharacter::SetSprintMode()
 {
 	if (!GetLastMovementInputVector().IsNearlyZero())
 	{
-		IsSprint = true;
+		bIsSprint = true;
 		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 	}
 }
 
-bool AActionCharacter::StaminaCheck()
+void AActionCharacter::StaminaRegenTimerSet()
 {
-	if (Stamina <= 0)
-	{
-		IsStaminaZero = true;
-		Stamina = 0;
-	}
-	else
-	{
-		IsStaminaZero = false;
-		if (Stamina >= MaxStamina)
-		{
-			Stamina = MaxStamina;
-		}
-	}
-	return IsStaminaZero;
+	//UWorld* world = GetWorld();
+	//FTimerManager& timemanger = world->GetTimerManager();
+	
+	GetWorldTimerManager().SetTimer(
+		StaminaCoolTimer,
+		[this]() {
+			//bRegenStamina = true;
+			GetWorldTimerManager().SetTimer(
+				StaminaRegenTimer,
+				this,
+				&AActionCharacter::StaminaRegenPerTick,
+				0.1f,	// 실행 간격
+				true,	// 반복 재생
+				0.1f);	// 첫 딜레이
+		},
+		StaminaRegenCoolTime,
+		false);
 }
+
+void AActionCharacter::StaminaRegenPerTick()
+{
+	CurrentStamina += StaminaRegenAmountByTick;	// 틱당 10
+	//CurrentStamina += MaxStamina * StaminaRegenRatePerTick; // 틱당 최대 스태미너의 10%
+
+	if (CurrentStamina > MaxStamina)
+	{
+		CurrentStamina = MaxStamina;
+		GetWorldTimerManager().ClearTimer(StaminaRegenTimer);
+	}
+}
+
 
 
