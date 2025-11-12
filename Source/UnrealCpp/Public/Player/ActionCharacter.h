@@ -10,6 +10,7 @@
 class UInputAction;
 class UCameraComponent;
 class USpringArmComponent;
+class UResourceComponent;
 
 UCLASS()
 class UNREALCPP_API AActionCharacter : public ACharacter
@@ -30,6 +31,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UResourceComponent* GetResourceComponent() { return Resource; }
 protected:
 	// 이동 방향 입력 받기
 	void OnMoveInput(const FInputActionValue& InValue);

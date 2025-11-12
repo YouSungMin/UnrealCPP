@@ -9,7 +9,7 @@ UResourceComponent::UResourceComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
 }
@@ -22,7 +22,9 @@ void UResourceComponent::BeginPlay()
 
 	// ...
 
-	CurrentStamina = MaxStamina; // 시작 할 때 최대치로 리셋
+	// 시작 할 때 최대치로 리셋
+	SetCurrentHealth(MaxHealth);
+	SetCurrentStamina(MaxStamina);
 }
 
 
@@ -36,21 +38,32 @@ void UResourceComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 
 void UResourceComponent::AddStamina(float InValue)
 {
-	// 스테미너 변경 처리
-	CurrentStamina += InValue;
-
 	//TimeSinceLastStaminaUse = 0;	// 시간을 직접 제이할 때 쓰던 코드(예시 확인용)
+	// 스테미너 변경 처리
+	SetCurrentStamina(FMath::Clamp(CurrentStamina + InValue, 0, MaxStamina));
 
 	// 스테미너를 소비하고 일정 시간 뒤에 자동 재생되게 타이머 세팅
 	StaminaAutoRegenCoolTimerSet();
 
 	if (CurrentStamina <= 0)
 	{
-		CurrentStamina = 0.0f;
 		// 델리게이트로 스테미너가 떨어졌음을 알림
 		OnStaminaEmpty.Broadcast();
 	}
-	UE_LOG(LogTemp, Log, TEXT("%.1f"), CurrentStamina);
+
+
+	//UE_LOG(LogTemp, Log, TEXT("%.1f"), CurrentStamina);
+}
+
+void UResourceComponent::AddHealth(float InValue)
+{
+	float health = CurrentHealth + InValue;
+	SetCurrentHealth(FMath::Clamp(health, 0, MaxHealth));
+
+	if (!IsAlive())
+	{
+		OnDie.Broadcast();
+	}
 }
 
 void UResourceComponent::StaminaAutoRegenCoolTimerSet()
@@ -78,15 +91,17 @@ void UResourceComponent::StaminaAutoRegenCoolTimerSet()
 
 void UResourceComponent::StaminaRegenPerTick()
 {
-	CurrentStamina += StaminaRegenAmountByTick;	// 틱당 10
+	float stamina = CurrentStamina + StaminaRegenAmountByTick;	// 틱당 10
 	//CurrentStamina += MaxStamina * StaminaRegenRatePerTick; // 틱당 최대 스태미너의 10%
 
-	if (CurrentStamina > MaxStamina)
+	if (stamina > MaxStamina)
 	{
-		CurrentStamina = MaxStamina;
+		stamina = MaxStamina;
 		UWorld* world = GetWorld();
 		FTimerManager& timeManager = world->GetTimerManager();
 		timeManager.ClearTimer(StaminaRegenTickTimer);
 	}
-	UE_LOG(LogTemp, Log, TEXT("%.1f"), CurrentStamina);
+
+	SetCurrentStamina(stamina);
+	//UE_LOG(LogTemp, Log, TEXT("%.1f"), CurrentStamina);
 }
