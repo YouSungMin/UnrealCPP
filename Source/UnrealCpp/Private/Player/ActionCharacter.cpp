@@ -6,6 +6,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Player/ResourceComponent.h"
 
 
 // Sets default values
@@ -24,6 +25,8 @@ AActionCharacter::AActionCharacter()
 	PlayerCamera->SetupAttachment(SpringArm);
 	PlayerCamera->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
 
+	Resource = CreateDefaultSubobject<UResourceComponent>(TEXT("PlayerResource"));
+
 	bUseControllerRotationYaw = false;	// 컨트롤러의 Yaw회전을 사용안함
 	GetCharacterMovement()->bOrientRotationToMovement = true;	// 이동 방향으로 캐릭터 회전
 	GetCharacterMovement()->RotationRate = FRotator(0,360,0);	
@@ -37,8 +40,6 @@ void AActionCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	AnimInstance = GetMesh()->GetAnimInstance(); // ABP 가져오기
-	
-	CurrentStamina = MaxStamina; // 시작 할 때 최대치로 리셋
 	bIsSprint = false;
 }
 
@@ -58,21 +59,10 @@ void AActionCharacter::Tick(float DeltaTime)
 	//		CurrentStamina = MaxStamina;
 	//	}
 	//}
-
-
-	if (bIsSprint)
+	if (bIsSprint && !GetVelocity().IsNearlyZero())
 	{
-		CurrentStamina -= SprintStaminaCost * DeltaTime;
-		//TimeSinceLastStaminaUse = 0;
-		StaminaRegenTimerSet();
-
-		if (CurrentStamina <= 0)
-		{
-			CurrentStamina = 0.0f;
-			SetWalkMode();
-		}
+		Resource->AddStamina(-SprintStaminaCost * DeltaTime);
 	}
-	UE_LOG(LogTemp, Log, TEXT("%.1f"),CurrentStamina);
 }
 
 // Called to bind functionality to input
@@ -112,15 +102,14 @@ void AActionCharacter::OnRollInput(const FInputActionValue& InValue)
 {
 	if (AnimInstance.IsValid())
 	{
-		if (!AnimInstance->IsAnyMontagePlaying() && CurrentStamina >= RollStaminaCost)
+		if (!AnimInstance->IsAnyMontagePlaying() && Resource->HasEnoughStamina(RollStaminaCost))
 		{
 			if(!GetLastMovementInputVector().IsNearlyZero())
 			{
 				SetActorRotation(GetLastMovementInputVector().Rotation());
 			}
-			CurrentStamina -= RollStaminaCost;
 			//TimeSinceLastStaminaUse = 0;
-			StaminaRegenTimerSet();
+			Resource->AddStamina(-RollStaminaCost);
 			PlayAnimMontage(RollMontage);
 		}
 	}
@@ -134,45 +123,10 @@ void AActionCharacter::SetWalkMode()
 
 void AActionCharacter::SetSprintMode()
 {
-	if (!GetLastMovementInputVector().IsNearlyZero())
-	{
-		bIsSprint = true;
-		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
-	}
+	bIsSprint = true;
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 }
 
-void AActionCharacter::StaminaRegenTimerSet()
-{
-	//UWorld* world = GetWorld();
-	//FTimerManager& timemanger = world->GetTimerManager();
-	
-	GetWorldTimerManager().SetTimer(
-		StaminaCoolTimer,
-		[this]() {
-			//bRegenStamina = true;
-			GetWorldTimerManager().SetTimer(
-				StaminaRegenTimer,
-				this,
-				&AActionCharacter::StaminaRegenPerTick,
-				0.1f,	// 실행 간격
-				true,	// 반복 재생
-				0.1f);	// 첫 딜레이
-		},
-		StaminaRegenCoolTime,
-		false);
-}
-
-void AActionCharacter::StaminaRegenPerTick()
-{
-	CurrentStamina += StaminaRegenAmountByTick;	// 틱당 10
-	//CurrentStamina += MaxStamina * StaminaRegenRatePerTick; // 틱당 최대 스태미너의 10%
-
-	if (CurrentStamina > MaxStamina)
-	{
-		CurrentStamina = MaxStamina;
-		GetWorldTimerManager().ClearTimer(StaminaRegenTimer);
-	}
-}
 
 
 
