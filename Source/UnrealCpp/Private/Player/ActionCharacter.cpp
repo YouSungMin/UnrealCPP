@@ -93,6 +93,7 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 				SetWalkMode();
 			});
 		enhanced->BindAction(IA_Roll, ETriggerEvent::Triggered, this, &AActionCharacter::OnRollInput);
+		enhanced->BindAction(IA_Attack, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttackInput);
 	}
 }
 
@@ -124,6 +125,24 @@ void AActionCharacter::OnRollInput(const FInputActionValue& InValue)
 	}
 }
 
+void AActionCharacter::OnAttackInput(const FInputActionValue& InValue)
+{
+	if (AnimInstance.IsValid() && Resource->HasEnoughStamina(AttackStaminaCost)) // 애님 인스턴스가 있고 스테미너가 충분할 때
+	{
+		if (!AnimInstance->IsAnyMontagePlaying())	// 몽타주가 재생 중이 아닐 때
+		{
+			// 첫 번째 공격
+			PlayAnimMontage(AttackMontage);
+			Resource->AddStamina(-AttackStaminaCost);	//스태미너 감소
+		}
+		else if (AnimInstance->GetCurrentActiveMontage() == AttackMontage)
+		{
+			SectionJumpForCombo();
+		}
+	}
+	
+}
+
 void AActionCharacter::SetWalkMode()
 {
 	bIsSprint = false;
@@ -134,6 +153,20 @@ void AActionCharacter::SetSprintMode()
 {
 	bIsSprint = true;
 	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+}
+
+void AActionCharacter::SectionJumpForCombo()
+{
+	if (SectionJumpNotify.IsValid() && bComboReady)	//SectionJumpNotify가 있고 콤보가 가능한 상태이면
+	{
+		UAnimMontage* current = AnimInstance->GetCurrentActiveMontage();
+		AnimInstance->Montage_SetNextSection(					// 다음 섹션으로 점프
+			AnimInstance->Montage_GetCurrentSection(current),	// 현재 섹션
+			SectionJumpNotify->GetNextSectionName(),			// 실행될 몽타주
+			current);
+		bComboReady = false;	//중복 실행 방지
+		Resource->AddStamina(-AttackStaminaCost);
+	}
 }
 
 

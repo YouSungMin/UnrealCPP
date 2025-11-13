@@ -12,3 +12,13 @@ void UResourceBarWidget::RefreshWidget(float InCurrent, float InMax)
 	Current->SetText(FText::AsNumber(FMath::FloorToInt(InCurrent)));
 	Max->SetText(FText::AsNumber(FMath::FloorToInt(InMax)));
 }
+
+void UResourceBarWidget::NativePreConstruct()
+{
+	Super::NativePreConstruct();
+
+	if (Bar)
+	{
+		Bar->SetFillColorAndOpacity(BarFillColor);
+	}
+}

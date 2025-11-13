@@ -72,17 +72,22 @@ void UResourceComponent::StaminaAutoRegenCoolTimerSet()
 	FTimerManager& timeManager = world->GetTimerManager();
 
 		timeManager.SetTimer(
-		StaminaAutoRegenCoolTimer,
+		StaminaAutoRegenCoolTimer, 
+		// StaminaAutoRegenCoolTimer 핸들에 연결될 타이머세팅, StaminaRegenCoolTime 초 후에 한번만 람다식을 실행
 		[this]() {
 			//bRegenStamina = true;
 			UWorld* world = GetWorld();
 			FTimerManager& timeManager = world->GetTimerManager();
 			timeManager.SetTimer(
 				StaminaRegenTickTimer,
+				// StaminaRegenTickTimer 핸들에 연결될 타이머 세팅, 
+				// StaminaTickInterval초를 처음에 한번 기다리고
+				// StaminaTickInterval 시간 간격으로
+				// StaminaRegenPerTick 함수 실행하는 타이머
 				this,
 				&UResourceComponent::StaminaRegenPerTick,
 				StaminaTickInterval,	// 실행 간격
-				true,	// 반복 재생
+				true,					// 반복 재생
 				StaminaTickInterval);	// 첫 딜레이
 		},
 		StaminaRegenCoolTime,

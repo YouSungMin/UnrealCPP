@@ -17,7 +17,7 @@ protected:
 	virtual void NativeConstruct() override;
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resource", meta = (BindWidget))
-	TObjectPtr<class UResourceBarWidget> HealthBar;
+	class UResourceBarWidget* HealthBar;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resource", meta = (BindWidget))
 	TObjectPtr<class UResourceBarWidget> StaminaBar;

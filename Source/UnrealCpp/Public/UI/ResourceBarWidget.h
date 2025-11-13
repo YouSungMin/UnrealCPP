@@ -17,13 +17,19 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RefreshWidget(float InCurrent, float InMax);
 protected:
+	virtual void NativePreConstruct() override;
+
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resource", meta = (BindWidget))
-	TObjectPtr<class UProgressBar> Bar;
+	class UProgressBar* Bar;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resource", meta = (BindWidget))
 	TObjectPtr<class UTextBlock> Current;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resource", meta = (BindWidget))
 	TObjectPtr<class UTextBlock> Max;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+	FLinearColor BarFillColor = FLinearColor::Red;
 	
 };
