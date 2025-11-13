@@ -59,8 +59,11 @@ protected:
 	// 달리기 모드 설정
 	void SetSprintMode();
 private:
+	// 콤보용 섹션 점프 함수
 	void SectionJumpForCombo();
 
+	// 달리기 스테미너 소비 함수
+	void StandSprintStamina(float DeltaTime);
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USpringArmComponent> SpringArm = nullptr;

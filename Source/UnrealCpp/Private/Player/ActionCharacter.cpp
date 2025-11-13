@@ -57,21 +57,7 @@ void AActionCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 타이머로 조건만 설정하는 경우
-	//if (bRegenStamina)
-	//{
-	//	CurrentStamina += StaminaRegenAmount * DeltaTime;
-
-	//	if (CurrentStamina > MaxStamina)
-	//	{
-	//		bRegenStamina = false;
-	//		CurrentStamina = MaxStamina;
-	//	}
-	//}
-	if (bIsSprint && !GetVelocity().IsNearlyZero())
-	{
-		Resource->AddStamina(-SprintStaminaCost * DeltaTime);
-	}
+	StandSprintStamina(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -166,6 +152,15 @@ void AActionCharacter::SectionJumpForCombo()
 			current);
 		bComboReady = false;	//중복 실행 방지
 		Resource->AddStamina(-AttackStaminaCost);
+	}
+}
+
+void AActionCharacter::StandSprintStamina(float DeltaTime)
+{
+	if ((bIsSprint && !GetVelocity().IsNearlyZero())
+		&& (AnimInstance.IsValid() && !AnimInstance->IsAnyMontagePlaying()))
+	{ 
+		Resource->AddStamina(-SprintStaminaCost * DeltaTime);
 	}
 }
 
