@@ -24,7 +24,14 @@ protected:
 	void OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
 public:	
+	UFUNCTION(BlueprintCallable)
+	void AttackEbnale(bool bEnable);
+
+	virtual void PostInitializeComponents() override;
+
+	UFUNCTION(BlueprintCallable)
 	inline void SetWeaponOwner(ACharacter* InOwner) { WeaponOwner = InOwner; }
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Componenets")
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh = nullptr;
@@ -35,6 +42,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data")
 	float Damage = 10.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data")
+	TSubclassOf<UDamageType> DamageType = nullptr;
+	
 private:
 	TWeakObjectPtr<ACharacter> WeaponOwner = nullptr;
 };

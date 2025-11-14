@@ -3,6 +3,7 @@
 
 #include "Weapon/WeaponActor.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AWeaponActor::AWeaponActor()
@@ -33,6 +34,35 @@ void AWeaponActor::BeginPlay()
 
 void AWeaponActor::OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
+	float finalDamage = Damage;
+	AController* instigator = nullptr;
+	if (WeaponOwner.IsValid())
+	{
+		if(WeaponOwner == OtherActor)
+			return;
+		//finalDamage += WeaponOwner->GetAttackPower();
+		instigator = WeaponOwner->GetController();
+	}
 	UE_LOG(LogTemp,Log,TEXT("Overlapped : %s"),*OtherActor->GetName());
+	UGameplayStatics::ApplyDamage(OtherActor,finalDamage,instigator,this,DamageType);
+}
+
+void AWeaponActor::AttackEbnale(bool bEnable)
+{
+	if (bEnable)
+	{
+		WeaponCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	else
+	{
+		WeaponCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void AWeaponActor::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	// CDO(Class Default Object)의 설정대로 초기화된 이후 ( = OverlapOnlyPawn 설정 이후)
+	WeaponCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
