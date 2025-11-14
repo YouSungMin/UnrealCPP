@@ -50,10 +50,20 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	inline bool IsAlive() const { return CurrentHealth > 0; }
 
-	inline float GetCurrentHealth() const { return CurrentHealth; };
-	inline float GetMaxHealth() const { return MaxHealth;};
-	inline float GetCurrentStamina() const { return CurrentStamina; };
-	inline float GetMaxStamina() const { return MaxStamina;};
+	inline float GetCurrentHealth() const { return CurrentHealth; }
+	inline float GetMaxHealth() const { return MaxHealth;}
+	inline float GetCurrentStamina() const { return CurrentStamina; }
+	inline float GetMaxStamina() const { return MaxStamina;}
+	inline void SetMaxHealth(float InValue) { 
+		MaxHealth = InValue;
+		CurrentHealth = MaxHealth;
+		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
+	}
+	inline void SetMaxStamina(float InValue) {
+		MaxStamina = InValue; 
+		CurrentStamina = MaxStamina;
+		OnStaminaChanged.Broadcast(CurrentStamina, MaxStamina);
+	}
 
 	// 사망을 알리는 델리게이트
 	UPROPERTY(BlueprintAssignable, Category = "Event")
@@ -77,7 +87,8 @@ private:
 	inline void SetCurrentStamina(float InValue) {
 		CurrentStamina = InValue;
 		OnStaminaChanged.Broadcast(CurrentStamina, MaxStamina);
-	};;
+	};
+
 protected:
 	// 현재 스테미너(값을 설정할 때 Setter로 설정할 것)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Stamina")

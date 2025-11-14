@@ -18,4 +18,14 @@ float UStatusComponent::GetAttackPower()
 	return Strength * AttackModifier;
 }
 
+float UStatusComponent::GetBaseMaxHealth()
+{
+	return BaseMaxHealth;
+}
+
+float UStatusComponent::GetBaseMaxStamina()
+{
+	return BaseMaxStamina;
+}
+
 

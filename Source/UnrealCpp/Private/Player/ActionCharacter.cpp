@@ -53,6 +53,9 @@ void AActionCharacter::BeginPlay()
 	}
 	bIsSprint = false;
 
+	Resource->SetMaxHealth(Status->GetBaseMaxHealth());
+	Resource->SetMaxStamina(Status->GetBaseMaxStamina());
+
 }
 
 // Called every frame

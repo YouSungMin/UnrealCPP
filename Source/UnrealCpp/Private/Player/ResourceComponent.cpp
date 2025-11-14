@@ -38,7 +38,7 @@ void UResourceComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 
 void UResourceComponent::AddStamina(float InValue)
 {
-	//TimeSinceLastStaminaUse = 0;	// 시간을 직접 제이할 때 쓰던 코드(예시 확인용)
+	//TimeSinceLastStaminaUse = 0;	// 시간을 직접 제할 때 쓰던 코드(예시 확인용)
 	// 스테미너 변경 처리
 	SetCurrentStamina(FMath::Clamp(CurrentStamina + InValue, 0, MaxStamina));
 
