@@ -20,9 +20,10 @@ void UResourceBarWidget::PostEditChangeProperty(FPropertyChangedEvent& PropertyC
 	Super::PostEditChangeProperty(PropertyChagedEvent);
 
 	FName propertyName = (PropertyChagedEvent.Property != nullptr) ? PropertyChagedEvent.Property->GetFName() : NAME_None;
+	//UResourceBarWidget의 FillColor가 변경되었을 때만 처리
 	if (propertyName == GET_MEMBER_NAME_CHECKED(UResourceBarWidget, BarFillColor))
 	{
-		BarBackgroundFillColor = BarFillColor;
+		BarBackgroundFillColor = BarFillColor; //Background를 FillColor와 같은 색으로 변경하고 알파값만 0.2로 설정
 		BarBackgroundFillColor.A = 0.2f;
 	}
 }
