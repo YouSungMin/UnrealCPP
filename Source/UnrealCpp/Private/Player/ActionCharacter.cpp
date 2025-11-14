@@ -6,6 +6,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Weapon/WeaponActor.h"
 #include "Player/ResourceComponent.h"
 
 
@@ -48,8 +49,8 @@ void AActionCharacter::BeginPlay()
 	{
 		Resource->OnStaminaEmpty.AddDynamic(this, &AActionCharacter::SetWalkMode);
 	}
-
 	bIsSprint = false;
+
 }
 
 // Called every frame
@@ -81,6 +82,15 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		enhanced->BindAction(IA_Roll, ETriggerEvent::Triggered, this, &AActionCharacter::OnRollInput);
 		enhanced->BindAction(IA_Attack, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttackInput);
 	}
+}
+
+void AActionCharacter::OnAttackEnable(bool bAttackEnable)
+{
+	if (CurrentWeapon.IsValid())
+	{
+		CurrentWeapon->AttackEnable(bAttackEnable);
+	}
+
 }
 
 void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)

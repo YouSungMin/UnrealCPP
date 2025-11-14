@@ -25,7 +25,7 @@ protected:
 
 public:	
 	UFUNCTION(BlueprintCallable)
-	void AttackEbnale(bool bEnable);
+	void AttackEnable(bool bEnable);
 
 	virtual void PostInitializeComponents() override;
 

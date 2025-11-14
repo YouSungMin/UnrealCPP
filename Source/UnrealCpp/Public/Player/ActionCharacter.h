@@ -42,6 +42,9 @@ public:
 		bComboReady = InSectionJumpNotify != nullptr;
 	}
 
+	// 노피파이가 공격을 가능하게 만들라는 신호가 왔을 때 실행될 함수
+	void OnAttackEnable(bool bAttackEnable);
+
 protected:
 	// 이동 방향 입력 받기
 	void OnMoveInput(const FInputActionValue& InValue);
@@ -114,6 +117,10 @@ protected:
 	// 플레이어가 뛰고있는 상태 표시 변수
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|State")
 	bool bIsSprint = false;
+
+	// 플레이어가 현재 가지고 있는 무기
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	TWeakObjectPtr<class AWeaponActor> CurrentWeapon = nullptr;
 
 private:
 	UPROPERTY()

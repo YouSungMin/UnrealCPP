@@ -47,7 +47,7 @@ void AWeaponActor::OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherAc
 	UGameplayStatics::ApplyDamage(OtherActor,finalDamage,instigator,this,DamageType);
 }
 
-void AWeaponActor::AttackEbnale(bool bEnable)
+void AWeaponActor::AttackEnable(bool bEnable)
 {
 	if (bEnable)
 	{
