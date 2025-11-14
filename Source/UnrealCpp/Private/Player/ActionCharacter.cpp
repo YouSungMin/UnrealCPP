@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 #include "Weapon/WeaponActor.h"
 #include "Player/ResourceComponent.h"
+#include "Player/StatusComponent.h"
 
 
 // Sets default values
@@ -27,6 +28,7 @@ AActionCharacter::AActionCharacter()
 	PlayerCamera->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
 
 	Resource = CreateDefaultSubobject<UResourceComponent>(TEXT("PlayerResource"));
+	Status = CreateDefaultSubobject<UStatusComponent>(TEXT("PlayerStatus"));
 
 	bUseControllerRotationYaw = false;	// 컨트롤러의 Yaw회전을 사용안함
 	GetCharacterMovement()->bOrientRotationToMovement = true;	// 이동 방향으로 캐릭터 회전
