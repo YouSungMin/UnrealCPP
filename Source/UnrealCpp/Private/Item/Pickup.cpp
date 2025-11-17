@@ -3,6 +3,7 @@
 
 #include "Item/Pickup.h"
 #include "Components/SphereComponent.h"
+#include "Components/TimelineComponent.h"
 #include "NiagaraComponent.h"
 #include "Player/InventoryOwner.h"
 
@@ -33,6 +34,8 @@ APickup::APickup()
 
 	Effect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Effect"));
 	Effect->SetupAttachment(BaseRoot);
+
+	PickupTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("PickupTimeline"));
 }
 
 // Called when the game starts or when spawned
@@ -43,6 +46,19 @@ void APickup::BeginPlay()
 	if (PickupOverlap)
 	{
 		PickupOverlap->OnComponentBeginOverlap.AddDynamic(this, &APickup::OnPickupBeginOverlap);
+	}
+	if (PickupTimeline)
+	{
+		if (ScaleCurve)
+		{
+			FOnTimelineFloat ScaleUpdateDelegate;
+			ScaleUpdateDelegate.BindUFunction(this,FName("OnScaleUpdate"));
+			PickupTimeline->AddInterpFloat(ScaleCurve,ScaleUpdateDelegate);
+
+			FOnTimelineEvent ScaleFinishDelegate;
+			ScaleFinishDelegate.BindUFunction(this,FName("OnScaleFinish"));
+			PickupTimeline->SetTimelineFinishedFunc(ScaleFinishDelegate);
+		}
 	}
 }
 
@@ -58,14 +74,27 @@ void APickup::OnPickup_Implementation(AActor* Target)
 {
 	//UE_LOG(LogTemp,Log,TEXT("OnPickup_Implementation 실행"));
 
+	PickupOwner = Target;
+
 	// 자신을 먹은 대상에게 자기가 가지고 있는 무기를 알려줘야 함
-	if (Target && Target->Implements<UInventoryOwner>())
-	{
-		IInventoryOwner::Execute_AddItem(Target, PickupItem);
-	}
+	PickupTimeline->PlayFromStart();
 }
 
 void APickup::OnPickupBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	//UE_LOG(LogTemp,Log,TEXT("Pickup overlap"));
+}
+
+void APickup::OnScaleUpdate(float Value)
+{
+	FVector NewScale = FVector::One() * Value;
+	SetActorScale3D(NewScale);
+}
+
+void APickup::OnScaleFinish()
+{
+	if (PickupOwner.IsValid() && PickupOwner->Implements<UInventoryOwner>())
+	{
+		IInventoryOwner::Execute_AddItem(PickupOwner.Get(), PickupItem);
+	}
 }
