@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "AnimNotify/AnimNotifyState_SectionJump.h"
+#include "InventoryOwner.h"
+#include "Common/CommonEnum.h"
 #include "ActionCharacter.generated.h"
 
 class UInputAction;
@@ -16,7 +18,7 @@ class UStatusComponent;
 //class UAnimNotifyState_SectionJump;
 
 UCLASS()
-class UNREALCPP_API AActionCharacter : public ACharacter
+class UNREALCPP_API AActionCharacter : public ACharacter, public IInventoryOwner
 {
 	GENERATED_BODY()
 
@@ -34,6 +36,9 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+
+	virtual void AddItem_Implementation(EItemCode Code);
 
 	UResourceComponent* GetResourceComponent() { return Resource; }
 	UStatusComponent* GetStatusComponent() { return Status; }

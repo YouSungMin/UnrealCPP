@@ -4,6 +4,7 @@
 #include "Item/Pickup.h"
 #include "Components/SphereComponent.h"
 #include "NiagaraComponent.h"
+#include "Player/InventoryOwner.h"
 
 // Sets default values
 APickup::APickup()
@@ -53,12 +54,18 @@ void APickup::Tick(float DeltaTime)
 	SkeletalMesh->AddWorldRotation(FRotator(0, DeltaTime*RotateSpeed, 0));
 }
 
-void APickup::OnPickup_Implementation()
+void APickup::OnPickup_Implementation(AActor* Target)
 {
-	UE_LOG(LogTemp,Log,TEXT("OnPickup_Implementation 실행"));
+	//UE_LOG(LogTemp,Log,TEXT("OnPickup_Implementation 실행"));
+
+	// 자신을 먹은 대상에게 자기가 가지고 있는 무기를 알려줘야 함
+	if (Target && Target->Implements<UInventoryOwner>())
+	{
+		IInventoryOwner::Execute_AddItem(Target, PickupItem);
+	}
 }
 
 void APickup::OnPickupBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp,Log,TEXT("Pickup overlap"));
+	//UE_LOG(LogTemp,Log,TEXT("Pickup overlap"));
 }
