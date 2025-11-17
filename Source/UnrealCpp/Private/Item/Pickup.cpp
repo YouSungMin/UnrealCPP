@@ -88,12 +88,15 @@ void APickup::Tick(float DeltaTime)
 void APickup::OnPickup_Implementation(AActor* Target)
 {
 	//UE_LOG(LogTemp,Log,TEXT("OnPickup_Implementation 실행"));
-
 	if(!bPickuped)
 	{
 		bPickuped = true;
 		PickupOwner = Target;
 		PickupLocation = GetActorLocation();
+
+		BaseRoot->SetSimulatePhysics(false);
+		BaseRoot->SetCollisionProfileName(TEXT("NoCollision"));
+
 		PickupTimeline->PlayFromStart(); // 타임라인 시작
 	}
 }
