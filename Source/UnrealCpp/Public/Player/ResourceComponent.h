@@ -56,11 +56,11 @@ public:
 	inline float GetMaxStamina() const { return MaxStamina;}
 	inline void SetMaxHealth(float InValue) { 
 		MaxHealth = InValue;
-		CurrentHealth = MaxHealth;
+		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 	}
 	inline void SetMaxStamina(float InValue) {
 		MaxStamina = InValue; 
-		CurrentStamina = MaxStamina;
+		OnStaminaChanged.Broadcast(CurrentStamina, MaxStamina);
 	}
 
 	// 사망을 알리는 델리게이트

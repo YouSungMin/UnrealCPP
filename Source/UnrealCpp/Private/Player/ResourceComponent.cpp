@@ -40,7 +40,7 @@ void UResourceComponent::AddStamina(float InValue)
 {
 	//TimeSinceLastStaminaUse = 0;	// 시간을 직접 제할 때 쓰던 코드(예시 확인용)
 	// 스테미너 변경 처리
-	SetCurrentStamina(FMath::Clamp(CurrentStamina + InValue, 0, MaxStamina));
+	SetCurrentStamina(CurrentStamina + InValue);
 
 	if(InValue < 0)
 	{
@@ -60,8 +60,7 @@ void UResourceComponent::AddStamina(float InValue)
 
 void UResourceComponent::AddHealth(float InValue)
 {
-	float health = CurrentHealth + InValue;
-	SetCurrentHealth(health);
+	SetCurrentHealth(CurrentHealth + InValue);
 
 	if (!IsAlive())
 	{
