@@ -13,19 +13,19 @@ UStatusComponent::UStatusComponent()
 	// ...
 }
 
-float UStatusComponent::GetAttackPower()
+float UStatusComponent::GetAttackPower() const
 {
 	return Strength * AttackModifier;
 }
 
-float UStatusComponent::GetBaseMaxHealth()
+float UStatusComponent::GetBaseMaxHealth() const
 {
-	return BaseMaxHealth;
+	return (Strength * 0.5 + Vitality * 0.5f) * 10.0f;
 }
 
-float UStatusComponent::GetBaseMaxStamina()
+float UStatusComponent::GetBaseMaxStamina() const
 {
-	return BaseMaxStamina;
+	return (Strength * 0.2 + Vitality * 0.8f) * 10.0f;
 }
 
 

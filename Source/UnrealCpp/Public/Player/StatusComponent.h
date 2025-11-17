@@ -17,11 +17,14 @@ public:
 	UStatusComponent();
 
 	// 스테이터스와 모디파이어를 기반으로 공격력을 계산해서 리턴하는 함수
-	float GetAttackPower();
+	float GetAttackPower() const;
 
-	float GetBaseMaxHealth();
+	// 스테이터스와 모디파이어를 기반으로 최대 체력을 계산해서 리턴하는 함수
+	float GetBaseMaxHealth() const;
 
-	float GetBaseMaxStamina();
+	// 스테이터스와 모디파이어를 기반으로 최대 스테미너을 계산해서 리턴하는 함수
+	float GetBaseMaxStamina() const;
+
 protected:
 	// 힘
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status", meta = (ClampMin = "0", ClampMax = "20"))
@@ -35,10 +38,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status", meta = (ClampMin = "0", ClampMax = "20"))
 	int32 Vitality = 10;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status", meta = (ClampMin = "0", ClampMax = "20"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status")
 	float BaseMaxHealth = 150.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status", meta = (ClampMin = "0", ClampMax = "20"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status")
 	float BaseMaxStamina = 150.0f;
 
 	// 공격력 모디파이어

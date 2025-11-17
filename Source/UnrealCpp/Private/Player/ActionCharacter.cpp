@@ -40,6 +40,16 @@ AActionCharacter::AActionCharacter()
 // Called when the game starts or when spawned
 void AActionCharacter::BeginPlay()
 {
+	if (Resource)
+	{
+		Resource->OnStaminaEmpty.AddDynamic(this, &AActionCharacter::SetWalkMode);
+		if (Status)
+		{
+			Resource->SetMaxHealth(Status->GetBaseMaxHealth());
+			Resource->SetMaxStamina(Status->GetBaseMaxStamina());
+		}
+	}
+
 	Super::BeginPlay();
 
 	if (GetMesh())
@@ -47,15 +57,7 @@ void AActionCharacter::BeginPlay()
 		AnimInstance = GetMesh()->GetAnimInstance(); // ABP 가져오기
 	}
 
-	if (Resource)
-	{
-		Resource->OnStaminaEmpty.AddDynamic(this, &AActionCharacter::SetWalkMode);
-	}
 	bIsSprint = false;
-
-	Resource->SetMaxHealth(Status->GetBaseMaxHealth());
-	Resource->SetMaxStamina(Status->GetBaseMaxStamina());
-
 }
 
 // Called every frame

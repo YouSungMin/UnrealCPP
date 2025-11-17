@@ -61,7 +61,7 @@ void UResourceComponent::AddStamina(float InValue)
 void UResourceComponent::AddHealth(float InValue)
 {
 	float health = CurrentHealth + InValue;
-	SetCurrentHealth(FMath::Clamp(health, 0, MaxHealth));
+	SetCurrentHealth(health);
 
 	if (!IsAlive())
 	{

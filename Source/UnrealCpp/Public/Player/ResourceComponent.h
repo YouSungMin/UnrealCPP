@@ -57,12 +57,10 @@ public:
 	inline void SetMaxHealth(float InValue) { 
 		MaxHealth = InValue;
 		CurrentHealth = MaxHealth;
-		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 	}
 	inline void SetMaxStamina(float InValue) {
 		MaxStamina = InValue; 
 		CurrentStamina = MaxStamina;
-		OnStaminaChanged.Broadcast(CurrentStamina, MaxStamina);
 	}
 
 	// 사망을 알리는 델리게이트
@@ -81,11 +79,11 @@ private:
 	void StaminaRegenPerTick();
 
 	inline void SetCurrentHealth(float InValue){
-		CurrentHealth = InValue;
+		CurrentHealth = FMath::Clamp(InValue, 0, MaxHealth);
 		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 	};
 	inline void SetCurrentStamina(float InValue) {
-		CurrentStamina = InValue;
+		CurrentStamina = FMath::Clamp(InValue, 0, MaxStamina);
 		OnStaminaChanged.Broadcast(CurrentStamina, MaxStamina);
 	};
 
