@@ -55,11 +55,26 @@ void APickup::BeginPlay()
 			ScaleUpdateDelegate.BindUFunction(this,FName("OnScaleUpdate"));
 			PickupTimeline->AddInterpFloat(ScaleCurve,ScaleUpdateDelegate);
 
+			FOnTimelineFloat DistanceUpdateDelegate;
+			DistanceUpdateDelegate.BindUFunction(this, FName("OnDistanceUpdate"));
+			PickupTimeline->AddInterpFloat(DistanceCurve, DistanceUpdateDelegate);
+
+			FOnTimelineFloat RelativeUpdateDelegate;
+			RelativeUpdateDelegate.BindUFunction(this, FName("OnRelativeUpdate"));
+			PickupTimeline->AddInterpFloat(RelativeCurve, RelativeUpdateDelegate);
+
 			FOnTimelineEvent ScaleFinishDelegate;
 			ScaleFinishDelegate.BindUFunction(this,FName("OnScaleFinish"));
 			PickupTimeline->SetTimelineFinishedFunc(ScaleFinishDelegate);
+
+			FOnTimelineEvent PostUpdateDelegate;
+			PostUpdateDelegate.BindUFunction(this, FName("OnTimelineTick"));
+			PickupTimeline->SetTimelinePostUpdateFunc(PostUpdateDelegate);
 		}
+
+		PickupTimeline->SetPlayRate(1/Duration);
 	}
+	bPickuped = false;
 }
 
 // Called every frame
@@ -74,10 +89,13 @@ void APickup::OnPickup_Implementation(AActor* Target)
 {
 	//UE_LOG(LogTemp,Log,TEXT("OnPickup_Implementation 실행"));
 
-	PickupOwner = Target;
-
-	// 자신을 먹은 대상에게 자기가 가지고 있는 무기를 알려줘야 함
-	PickupTimeline->PlayFromStart();
+	if(!bPickuped)
+	{
+		bPickuped = true;
+		PickupOwner = Target;
+		PickupLocation = GetActorLocation();
+		PickupTimeline->PlayFromStart(); // 타임라인 시작
+	}
 }
 
 void APickup::OnPickupBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -91,10 +109,25 @@ void APickup::OnScaleUpdate(float Value)
 	SetActorScale3D(NewScale);
 }
 
+void APickup::OnDistanceUpdate(float Value)
+{
+	DisctanceVector = FMath::Lerp(PickupLocation, PickupOwner->GetActorLocation(),Value);
+}
+
+void APickup::OnRelativeUpdate(float Value)
+{
+	RelativeVector = Value * 50.0f * FVector(0,1,0);
+}
+
 void APickup::OnScaleFinish()
 {
 	if (PickupOwner.IsValid() && PickupOwner->Implements<UInventoryOwner>())
 	{
 		IInventoryOwner::Execute_AddItem(PickupOwner.Get(), PickupItem);
 	}
+}
+
+void APickup::OnTimelineTick()
+{
+	SetActorLocation(DisctanceVector+RelativeVector);
 }

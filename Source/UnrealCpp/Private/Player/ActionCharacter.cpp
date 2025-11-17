@@ -170,7 +170,7 @@ void AActionCharacter::SetSprintMode()
 
 void AActionCharacter::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Log, TEXT("Char overlap : other is %s"),*OtherActor->GetName());
+	//UE_LOG(LogTemp, Log, TEXT("Char overlap : other is %s"),*OtherActor->GetName());
 
 	// Cast를 이용한 인터페이스 사용
 	//IPickupable* test = Cast<IPickupable>(OtherActor);
