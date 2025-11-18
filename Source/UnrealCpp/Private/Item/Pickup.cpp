@@ -43,33 +43,18 @@ void APickup::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (PickupOverlap)
-	{
-		PickupOverlap->OnComponentBeginOverlap.AddDynamic(this, &APickup::OnPickupBeginOverlap);
-	}
 	if (PickupTimeline)
 	{
 		if (ScaleCurve)
 		{
-			FOnTimelineFloat ScaleUpdateDelegate;
-			ScaleUpdateDelegate.BindUFunction(this,FName("OnScaleUpdate"));
-			PickupTimeline->AddInterpFloat(ScaleCurve,ScaleUpdateDelegate);
+			FOnTimelineFloat UpdateDelegate;
+			UpdateDelegate.BindUFunction(this, FName("OnTimeLineUpdate"));
+			PickupTimeline->AddInterpFloat(DistanceCurve, UpdateDelegate);
 
-			FOnTimelineFloat DistanceUpdateDelegate;
-			DistanceUpdateDelegate.BindUFunction(this, FName("OnDistanceUpdate"));
-			PickupTimeline->AddInterpFloat(DistanceCurve, DistanceUpdateDelegate);
+			FOnTimelineEvent FinishDelegate;
+			FinishDelegate.BindUFunction(this, FName("OnTimeLineFinished"));
+			PickupTimeline->SetTimelineFinishedFunc(FinishDelegate);
 
-			FOnTimelineFloat RelativeUpdateDelegate;
-			RelativeUpdateDelegate.BindUFunction(this, FName("OnRelativeUpdate"));
-			PickupTimeline->AddInterpFloat(RelativeCurve, RelativeUpdateDelegate);
-
-			FOnTimelineEvent ScaleFinishDelegate;
-			ScaleFinishDelegate.BindUFunction(this,FName("OnScaleFinish"));
-			PickupTimeline->SetTimelineFinishedFunc(ScaleFinishDelegate);
-
-			FOnTimelineEvent PostUpdateDelegate;
-			PostUpdateDelegate.BindUFunction(this, FName("OnTimelineTick"));
-			PickupTimeline->SetTimelinePostUpdateFunc(PostUpdateDelegate);
 		}
 
 		PickupTimeline->SetPlayRate(1/Duration);
@@ -92,45 +77,40 @@ void APickup::OnPickup_Implementation(AActor* Target)
 	{
 		bPickuped = true;
 		PickupOwner = Target;
-		PickupLocation = GetActorLocation();
+		PickupStartLocation = SkeletalMesh->GetRelativeLocation() + GetActorLocation();
 
 		BaseRoot->SetSimulatePhysics(false);
-		BaseRoot->SetCollisionProfileName(TEXT("NoCollision"));
+		SetActorEnableCollision(false);
+		//BaseRoot->SetCollisionProfileName(TEXT("NoCollision"));
 
 		PickupTimeline->PlayFromStart(); // 타임라인 시작
 	}
 }
 
-void APickup::OnPickupBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void APickup::OnTimeLineUpdate(float Value)
 {
-	//UE_LOG(LogTemp,Log,TEXT("Pickup overlap"));
+	// 타임라인의 정규화 된 진행 시간 (0~1)
+	float currentTime = PickupTimeline->GetPlaybackPosition();
+
+	// 커브의 현재 값 받아오기
+	float distanceValue = Value;
+	float relativeValue = RelativeCurve ? RelativeCurve->GetFloatValue(currentTime) : 0.0f;
+	float scaleValue = ScaleCurve ? ScaleCurve->GetFloatValue(currentTime) : 1.0f;
+
+	// 커브값을 기준으로 새 위치와 스케일 계산
+	FVector NewLocation = FMath::Lerp(PickupStartLocation, PickupOwner.Get()->GetActorLocation(), distanceValue);
+	NewLocation += relativeValue * PickupHeight * FVector::UpVector;
+	SkeletalMesh->SetWorldLocation(NewLocation);
+
+	FVector NewScale = FVector::One() * scaleValue;
+	SkeletalMesh->SetRelativeScale3D(NewScale);
 }
 
-void APickup::OnScaleUpdate(float Value)
-{
-	FVector NewScale = FVector::One() * Value;
-	SetActorScale3D(NewScale);
-}
-
-void APickup::OnDistanceUpdate(float Value)
-{
-	DisctanceVector = FMath::Lerp(PickupLocation, PickupOwner->GetActorLocation(),Value);
-}
-
-void APickup::OnRelativeUpdate(float Value)
-{
-	RelativeVector = Value * 50.0f * FVector(0,1,0);
-}
-
-void APickup::OnScaleFinish()
+void APickup::OnTimeLineFinished()
 {
 	if (PickupOwner.IsValid() && PickupOwner->Implements<UInventoryOwner>())
 	{
 		IInventoryOwner::Execute_AddItem(PickupOwner.Get(), PickupItem);
 	}
-}
-
-void APickup::OnTimelineTick()
-{
-	SetActorLocation(DisctanceVector+RelativeVector);
+	Destroy();
 }

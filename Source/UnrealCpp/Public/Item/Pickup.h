@@ -28,28 +28,10 @@ public:
 	virtual void OnPickup_Implementation(AActor* Target)override;
 private:
 	UFUNCTION()
-	void OnPickupBeginOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult);
-
+	void OnTimeLineUpdate(float Value);
 	UFUNCTION()
-	void OnScaleUpdate(float Value);
+	void OnTimeLineFinished();
 
-	UFUNCTION()
-	void OnDistanceUpdate(float Value);
-
-	UFUNCTION()
-	void OnRelativeUpdate(float Value);
-
-	UFUNCTION()
-	void OnScaleFinish();
-
-	UFUNCTION()
-	void OnTimelineTick();
 protected:
 	// 물리 적용용 루트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -95,9 +77,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
 	float Duration = 0.5f;
 
-protected:
-	FVector RelativeVector;
-	FVector DisctanceVector;
+	// 아이템 획득 시 튀어 오르는 높이
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
+	float PickupHeight = 50.0f;
+
 private:
 	// 이 픽업 아이템을 먹은 액터
 	TWeakObjectPtr<AActor> PickupOwner = nullptr;
@@ -105,6 +88,5 @@ private:
 	// 획득 되었는지 여부(true면 획득 처리 중)
 	bool bPickuped = false;
 
-	FVector PickupLocation;
-
+	FVector PickupStartLocation;
 };

@@ -25,13 +25,19 @@ protected:
 	void OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
 public:	
+	// 공격을 활성화/비활성화 하는 함수  콜리전 키고 끄기
 	UFUNCTION(BlueprintCallable)
 	void AttackEnable(bool bEnable);
 
-	virtual void PostInitializeComponents() override;
-
+	// 공격을 했을 때 실행되어야 할 함수
 	UFUNCTION(BlueprintCallable)
-	inline void SetWeaponOwner(AActionCharacter* InOwner) { WeaponOwner = InOwner; }
+	virtual void OnAttack(){};
+	
+	// 무기를 획득했을 때 싫
+	UFUNCTION(BlueprintCallable)
+	virtual void OnWeaponPickuped(AActionCharacter* InOwner);
+
+	virtual void PostInitializeComponents() override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Componenets")

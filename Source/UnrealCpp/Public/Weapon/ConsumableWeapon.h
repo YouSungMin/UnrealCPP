@@ -6,6 +6,7 @@
 #include "Weapon/WeaponActor.h"
 #include "ConsumableWeapon.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponUesEnded);
 /**
  * 
  */
@@ -14,4 +15,20 @@ class UNREALCPP_API AConsumableWeapon : public AWeaponActor
 {
 	GENERATED_BODY()
 	
+public:
+	virtual void OnAttack() override;
+
+	virtual void OnWeaponPickuped(AActionCharacter* InOwner) override;
+protected:
+	// 최대 사용 횟수
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data");
+	int32 MaxUseCount = 10;
+
+	// 남은 사용 횟수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data");
+	int32 RemainingUseCount = 10;
+
+	UPROPERTY(BlueprintAssignable, Category = "Weapon");
+	FOnWeaponUesEnded OnWeaponUesEnded;
+
 };
