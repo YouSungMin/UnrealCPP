@@ -140,13 +140,25 @@ void AActionCharacter::OnRollInput(const FInputActionValue& InValue)
 
 void AActionCharacter::OnAttackInput(const FInputActionValue& InValue)
 {
-	if (AnimInstance.IsValid() && Resource->HasEnoughStamina(AttackStaminaCost)) // 애님 인스턴스가 있고 스테미너가 충분할 때
+	// 애님 인스턴스가 있고 스테미너가 충분하고 현재 무기가 공격을 할 수 있는 상태여야 함
+	if (AnimInstance.IsValid() && Resource->HasEnoughStamina(AttackStaminaCost)
+		&& CurrentWeapon.IsValid() && CurrentWeapon->CanAttack()) 
 	{
 		if (!AnimInstance->IsAnyMontagePlaying())	// 몽타주가 재생 중이 아닐 때
 		{
 			// 첫 번째 공격
-			PlayAnimMontage(AttackMontage);
+			PlayAnimMontage(AttackMontage); // 몽타주 재생
+
+			// 몽타주가 끝났을때 델리게이트 발송 (몽타주 플레이 이후 등록)
+			FOnMontageEnded onMontageEnded;
+			onMontageEnded.BindUObject(this, &AActionCharacter::OnAttachMontageEnded);
+			AnimInstance->Montage_SetEndDelegate(onMontageEnded);
+
 			Resource->AddStamina(-AttackStaminaCost);	//스태미너 감소
+			if (CurrentWeapon.IsValid())
+			{
+				CurrentWeapon->OnAttack();
+			}
 		}
 		else if (AnimInstance->GetCurrentActiveMontage() == AttackMontage)
 		{
@@ -187,6 +199,21 @@ void AActionCharacter::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActo
 	}
 }
 
+
+void AActionCharacter::OnAttachMontageEnded(UAnimMontage* Motage, bool bInterrupted)
+{
+	UE_LOG(LogTemp,Log,TEXT("공격 몽타주가 끝남"));
+	if (CurrentWeapon.IsValid() && !CurrentWeapon->CanAttack())
+	{
+		UE_LOG(LogTemp,Log,TEXT("다쓴 무기 버리기"));
+		TSubclassOf<AActor>* usedClass = UsedWeapon.Find(CurrentWeapon->GetWeaponID());
+		GetWorld()->SpawnActor<AActor>(
+			*usedClass, 
+			GetActorLocation() + GetActorForwardVector()* 100.0f,
+			GetActorRotation());
+	}
+}
+
 void AActionCharacter::SectionJumpForCombo()
 {
 	if (SectionJumpNotify.IsValid() && bComboReady)	//SectionJumpNotify가 있고 콤보가 가능한 상태이면
@@ -198,6 +225,10 @@ void AActionCharacter::SectionJumpForCombo()
 			current);
 		bComboReady = false;	//중복 실행 방지
 		Resource->AddStamina(-AttackStaminaCost);
+		if (CurrentWeapon.IsValid())
+		{
+			CurrentWeapon->OnAttack();
+		}
 	}
 }
 

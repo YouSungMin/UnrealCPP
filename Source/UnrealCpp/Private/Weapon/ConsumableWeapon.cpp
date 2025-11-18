@@ -6,6 +6,7 @@
 void AConsumableWeapon::OnAttack()
 {
 	RemainingUseCount--;
+	UE_LOG(LogTemp,Log,TEXT("%d"), RemainingUseCount);
 	if (RemainingUseCount <= 0)
 	{
 		OnWeaponUesEnded.Broadcast();
