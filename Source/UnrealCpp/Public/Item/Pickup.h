@@ -25,7 +25,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	// IPickupable 구현
 	virtual void OnPickup_Implementation(AActor* Target)override;
+
+	// 픽업에 힘을 가해서 날리는 함수
+	void AddImpulse(FVector& Velocity);
 private:
 	UFUNCTION()
 	void OnTimeLineUpdate(float Value);
@@ -69,6 +73,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
 	TObjectPtr<UCurveFloat> DistanceCurve = nullptr;
 
+	// 스폰 후에 먹을수 있게 될 때까지의 시간
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
+	float PickupableTime = 3.0f;
+
 	// 아이템 회전 속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
 	float RotateSpeed = 180.0f;
@@ -88,5 +96,9 @@ private:
 	// 획득 되었는지 여부(true면 획득 처리 중)
 	bool bPickuped = false;
 
+	// 획득했을 때 메시 위치(월드)
 	FVector PickupStartLocation;
+
+	// 스폰 직후 먹지 못하는 시간동안 기다리는 시간 타이머핸들러
+	FTimerHandle PickupableTimer;
 };

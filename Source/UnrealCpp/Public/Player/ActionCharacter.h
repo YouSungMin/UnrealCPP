@@ -52,6 +52,11 @@ public:
 	// 노피파이가 공격을 가능하게 만들라는 신호가 왔을 때 실행될 함수
 	void OnAttackEnable(bool bAttackEnable);
 
+	UFUNCTION(BlueprintCallable)
+	void TestDropUsedWeapon();
+
+	UFUNCTION(BlueprintCallable)
+	void TestDropCurrentWeapon();
 protected:
 	// 이동 방향 입력 받기
 	void OnMoveInput(const FInputActionValue& InValue);
@@ -81,6 +86,12 @@ private:
 
 	// 달리기 스테미너 소비 함수
 	void StandSprintStamina(float DeltaTime);
+
+	// 사용다한 무기를 버리는 함수
+	void DropUsedWeapon();
+
+	// 사용중이던 무기를 버리는 함수
+	void DropCurrentWeapon();
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USpringArmComponent> SpringArm = nullptr;
@@ -90,6 +101,8 @@ protected:
 	TObjectPtr<class UResourceComponent> Resource = nullptr;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Status")
 	TObjectPtr<class UStatusComponent> Status = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Status")
+	TObjectPtr<class USceneComponent> DropLocation = nullptr;
 
 	// Input Action
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input")
@@ -138,8 +151,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
 	TWeakObjectPtr<class AWeaponActor> CurrentWeapon = nullptr;
 
+	// 사용 다한 무기 액터
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
-	TMap<EItemCode, TSubclassOf<AActor>> UsedWeapon;
+	TMap<EItemCode, TSubclassOf<class AUsedWeapon>> UsedWeapons;
+
+	// Pickup 할수 있는 무기 액터
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	TMap<EItemCode, TSubclassOf<class APickup>> PickupWeapons;
 private:
 	UPROPERTY()
 	TWeakObjectPtr<UAnimInstance> AnimInstance = nullptr;

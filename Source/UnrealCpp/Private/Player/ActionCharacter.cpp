@@ -10,6 +10,8 @@
 #include "Player/ResourceComponent.h"
 #include "Player/StatusComponent.h"
 #include "Item/Pickupable.h"
+#include "Item/Pickup.h"
+#include "Weapon/UsedWeapon.h"
 
 
 // Sets default values
@@ -28,13 +30,15 @@ AActionCharacter::AActionCharacter()
 	PlayerCamera->SetupAttachment(SpringArm);
 	PlayerCamera->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
 
+	DropLocation = CreateDefaultSubobject<USceneComponent>(TEXT("DropLocation"));
+	DropLocation->SetupAttachment(RootComponent);
+
 	Resource = CreateDefaultSubobject<UResourceComponent>(TEXT("PlayerResource"));
 	Status = CreateDefaultSubobject<UStatusComponent>(TEXT("PlayerStatus"));
 
 	bUseControllerRotationYaw = false;	// 컨트롤러의 Yaw회전을 사용안함
 	GetCharacterMovement()->bOrientRotationToMovement = true;	// 이동 방향으로 캐릭터 회전
 	GetCharacterMovement()->RotationRate = FRotator(0,360,0);	
-
 
 }
 
@@ -205,12 +209,7 @@ void AActionCharacter::OnAttachMontageEnded(UAnimMontage* Motage, bool bInterrup
 	UE_LOG(LogTemp,Log,TEXT("공격 몽타주가 끝남"));
 	if (CurrentWeapon.IsValid() && !CurrentWeapon->CanAttack())
 	{
-		UE_LOG(LogTemp,Log,TEXT("다쓴 무기 버리기"));
-		TSubclassOf<AActor>* usedClass = UsedWeapon.Find(CurrentWeapon->GetWeaponID());
-		GetWorld()->SpawnActor<AActor>(
-			*usedClass, 
-			GetActorLocation() + GetActorForwardVector()* 100.0f,
-			GetActorRotation());
+		DropUsedWeapon();
 	}
 }
 
@@ -239,6 +238,47 @@ void AActionCharacter::StandSprintStamina(float DeltaTime)
 	{ 
 		Resource->AddStamina(-SprintStaminaCost * DeltaTime);
 	}
+}
+
+void AActionCharacter::DropUsedWeapon()
+{
+	UE_LOG(LogTemp, Log, TEXT("다쓴 무기 버리기"));
+	if (CurrentWeapon.IsValid())
+	{
+		if(TSubclassOf<AUsedWeapon>* usedClass = UsedWeapons.Find(CurrentWeapon->GetWeaponID()))
+		{
+			GetWorld()->SpawnActor<AUsedWeapon>(
+				*usedClass,
+				DropLocation->GetComponentLocation(),
+				GetActorRotation());
+		}
+	}
+}
+
+void AActionCharacter::DropCurrentWeapon()
+{
+	if (CurrentWeapon.IsValid() && CurrentWeapon->GetWeaponID() != EItemCode::BasicWeapon)
+	{
+		if (TSubclassOf<APickup>* pickupClass = PickupWeapons.Find(CurrentWeapon->GetWeaponID()))
+		{
+			APickup* pickup = GetWorld()->SpawnActor<APickup>(
+				*pickupClass,
+				DropLocation->GetComponentLocation(),
+				GetActorRotation());
+			FVector velocity = (GetActorForwardVector() + GetActorUpVector()) * 300.0f;
+			pickup->AddImpulse(velocity);
+		}
+	}
+}
+
+void AActionCharacter::TestDropUsedWeapon()
+{
+	DropUsedWeapon();
+}
+
+void AActionCharacter::TestDropCurrentWeapon()
+{
+	DropCurrentWeapon();
 }
 
 
