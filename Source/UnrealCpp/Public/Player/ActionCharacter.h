@@ -38,7 +38,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 
-	virtual void AddItem_Implementation(EItemCode Code);
+	virtual void AddItem_Implementation(EItemCode Code, int32 Count);
 
 	UResourceComponent* GetResourceComponent() { return Resource; }
 	UStatusComponent* GetStatusComponent() { return Status; }
@@ -53,9 +53,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void EquipWeapon(EItemCode WeaponCode);
 
-	// 다쓴 무기를 버리는 함수
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void DropWeapon(EItemCode WeaponCode);
+
 
 	// 노피파이가 공격을 가능하게 만들라는 신호가 왔을 때 실행될 함수
 	void OnAttackEnable(bool bAttackEnable);
@@ -95,8 +93,11 @@ private:
 	// 달리기 스테미너 소비 함수
 	void StandSprintStamina(float DeltaTime);
 
+	// 다쓴 무기를 버리는 함수
+	void DropWeapon(EItemCode WeaponCode);
+
 	// 사용중이던 무기를 버리는 함수
-	void DropCurrentWeapon();
+	void DropCurrentWeapon(EItemCode WeaponCode);
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USpringArmComponent> SpringArm = nullptr;

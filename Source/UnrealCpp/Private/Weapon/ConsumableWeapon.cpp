@@ -13,9 +13,20 @@ void AConsumableWeapon::OnAttack()
 	}
 }
 
-void AConsumableWeapon::OnWeaponPickuped()
+void AConsumableWeapon::OnWeaponPickuped(int InCount)
 {
-	Super::OnWeaponPickuped();
+	Super::OnWeaponPickuped(InCount);
 
+	RemainingUseCount = InCount;
+}
+
+void AConsumableWeapon::BeginPlay()
+{
+	Super::BeginPlay();
+	RemainingUseCount = MaxUseCount;
+}
+
+void AConsumableWeapon::OnWeaponActivate()
+{
 	RemainingUseCount = MaxUseCount;
 }

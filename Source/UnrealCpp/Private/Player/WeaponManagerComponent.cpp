@@ -28,7 +28,13 @@ AWeaponActor* UWeaponManagerComponent::GetEquippedWeapon(EItemCode InType) const
 	return weapon;
 }
 
-TSubclassOf<AUsedWeapon> UWeaponManagerComponent::GetUsedWeaponClass(EItemCode InType)
+TSubclassOf<APickup> UWeaponManagerComponent::GetPickupWeaponClass(EItemCode InType) const
+{
+	const UWeaponDataAssets* dataAsset = *WeaponDatabase.Find(InType);
+	return dataAsset->PickupWeaponClass;
+}
+
+TSubclassOf<AUsedWeapon> UWeaponManagerComponent::GetUsedWeaponClass(EItemCode InType) const
 {
 	const UWeaponDataAssets* dataAsset = *WeaponDatabase.Find(InType);
 	return dataAsset->UsedWaeponClass;
@@ -47,7 +53,7 @@ void UWeaponManagerComponent::BeginPlay()
 
 	//AWeaponActor* basicWeapon = GetEquippedWeapon(EItemCode::BasicWeapon);
 	//basicWeapon->WeaponActivate(true);
-	OwnerPlayer->EquipWeapon(EItemCode::Sword);
+	OwnerPlayer->EquipWeapon(EItemCode::BasicWeapon);
 }
 
 void UWeaponManagerComponent::WeaponDataBaseCheck()

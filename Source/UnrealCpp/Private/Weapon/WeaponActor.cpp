@@ -65,6 +65,7 @@ void AWeaponActor::WeaponActivate(bool bActivate)
 			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
 			TEXT("hand_rSocket"));
 		SetActorHiddenInGame(false);
+		OnWeaponActivate();
 	}
 	else
 	{
@@ -75,6 +76,7 @@ void AWeaponActor::WeaponActivate(bool bActivate)
 			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
 			TEXT("root"));
 		SetActorRelativeLocation(FVector(0,0,-10000.0f));
+		OnWeaponDeActivate();
 	}
 }
 
@@ -91,7 +93,7 @@ void AWeaponActor::AttackEnable(bool bEnable)
 }
 
 
-void AWeaponActor::OnWeaponPickuped()
+void AWeaponActor::OnWeaponPickuped(int InCount)
 {
 
 }

@@ -10,6 +10,7 @@
 #include "Player/ResourceComponent.h"
 #include "Player/StatusComponent.h"
 #include "Player/WeaponManagerComponent.h"
+#include "Weapon/ConsumableWeapon.h"
 #include "Item/Pickupable.h"
 #include "Item/Pickup.h"
 #include "Weapon/UsedWeapon.h"
@@ -33,6 +34,7 @@ AActionCharacter::AActionCharacter()
 
 	DropLocation = CreateDefaultSubobject<USceneComponent>(TEXT("DropLocation"));
 	DropLocation->SetupAttachment(RootComponent);
+	DropLocation->SetRelativeLocation(FVector(80.0f,30.0f,0.0f));
 
 	Resource = CreateDefaultSubobject<UResourceComponent>(TEXT("PlayerResource"));
 	Status = CreateDefaultSubobject<UStatusComponent>(TEXT("PlayerStatus"));
@@ -100,23 +102,31 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	}
 }
 
-void AActionCharacter::AddItem_Implementation(EItemCode Code)
+void AActionCharacter::AddItem_Implementation(EItemCode Code, int32 Count)
 {
 	const UEnum* EnumPtr = StaticEnum<EItemCode>();
 	
 	UE_LOG(LogTemp,Log,TEXT("아이템 추가 : %s"), *EnumPtr->GetDisplayNameTextByValue(static_cast<int8>(Code)).ToString());
 	EquipWeapon(Code);
+	CurrentWeapon->OnWeaponPickuped(Count);
 }
 
 void AActionCharacter::EquipWeapon(EItemCode WeaponCode)
 {
 	if (CurrentWeapon.IsValid())
 	{
+		if (CurrentWeapon->GetWeaponID() != EItemCode::BasicWeapon
+			&& CurrentWeapon->GetWeaponID() != WeaponCode
+			&& CurrentWeapon->CanAttack())
+		{
+			DropCurrentWeapon(CurrentWeapon->GetWeaponID());
+		}
 		CurrentWeapon->WeaponActivate(false);
 	}
 
 	CurrentWeapon = WeaponManager->GetEquippedWeapon(WeaponCode);
 	CurrentWeapon->WeaponActivate(true);
+
 }
 
 void AActionCharacter::DropWeapon(EItemCode WeaponCode)
@@ -185,7 +195,7 @@ void AActionCharacter::OnAttackInput(const FInputActionValue& InValue)
 			AnimInstance->Montage_SetEndDelegate(onMontageEnded);
 
 			Resource->AddStamina(-AttackStaminaCost);	//스태미너 감소
-			if (CurrentWeapon.IsValid())
+			if (CurrentWeapon.IsValid() && (CurrentWeapon->GetWeaponID() != EItemCode::BasicWeapon))
 			{
 				CurrentWeapon->OnAttack();
 			}
@@ -236,6 +246,7 @@ void AActionCharacter::OnAttachMontageEnded(UAnimMontage* Motage, bool bInterrup
 	if (CurrentWeapon.IsValid() && !CurrentWeapon->CanAttack())
 	{
 		DropWeapon(CurrentWeapon->GetWeaponID());
+		EquipWeapon(EItemCode::BasicWeapon);
 	}
 }
 
@@ -250,7 +261,7 @@ void AActionCharacter::SectionJumpForCombo()
 			current);
 		bComboReady = false;	//중복 실행 방지
 		Resource->AddStamina(-AttackStaminaCost);
-		if (CurrentWeapon.IsValid())
+		if (CurrentWeapon.IsValid() && (CurrentWeapon->GetWeaponID() != EItemCode::BasicWeapon))
 		{
 			CurrentWeapon->OnAttack();
 		}
@@ -266,16 +277,22 @@ void AActionCharacter::StandSprintStamina(float DeltaTime)
 	}
 }
 
-void AActionCharacter::DropCurrentWeapon()
+void AActionCharacter::DropCurrentWeapon(EItemCode WeaponCode)
 {
-	if (CurrentWeapon.IsValid() && CurrentWeapon->GetWeaponID() != EItemCode::BasicWeapon)
+	if (CurrentWeapon.IsValid() && (CurrentWeapon->GetWeaponID() != EItemCode::BasicWeapon))
 	{
-		if (TSubclassOf<APickup>* pickupClass = PickupWeapons.Find(CurrentWeapon->GetWeaponID()))
+		if (TSubclassOf<APickup> pickupClass = WeaponManager->GetPickupWeaponClass(WeaponCode))
 		{
 			APickup* pickup = GetWorld()->SpawnActor<APickup>(
 				*pickupClass,
 				DropLocation->GetComponentLocation(),
-				GetActorRotation());
+				GetActorRotation()
+				);
+
+			AConsumableWeapon* conWeapon = Cast<AConsumableWeapon>(CurrentWeapon);
+
+			pickup->SetPickupCount(conWeapon->GetRemainingUseCount());
+
 			FVector velocity = (GetActorForwardVector() + GetActorUpVector()) * 300.0f;
 			pickup->AddImpulse(velocity);
 		}
@@ -292,7 +309,7 @@ void AActionCharacter::TestDropUsedWeapon()
 
 void AActionCharacter::TestDropCurrentWeapon()
 {
-	DropCurrentWeapon();
+	DropCurrentWeapon(CurrentWeapon->GetWeaponID());
 }
 
 

@@ -19,11 +19,16 @@ class UNREALCPP_API AConsumableWeapon : public AWeaponActor
 public:
 	virtual void OnAttack() override;
 
-	virtual void OnWeaponPickuped() override;
+	virtual void OnWeaponPickuped(int InCount) override;
 
 	virtual bool CanAttack()override { return (RemainingUseCount > 0);}
 
+	int32 GetRemainingUseCount() const { return RemainingUseCount; }
+
 	//virtual FOnConsume& GetOnConsumeDelegate() { return OnWeaponUesEnded;}
+protected:
+	virtual void BeginPlay() override;
+	virtual void OnWeaponActivate() override;
 protected:
 	// 최대 사용 횟수
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data");
@@ -33,6 +38,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data");
 	int32 RemainingUseCount = 10;
 
+	// 무기를 다사용했을 때 사용되는 델리게이트 (사용안하는중)
 	UPROPERTY(BlueprintAssignable, BlueprintReadWrite, Category = "Weapon");
 	FOnConsume OnWeaponUesEnded;
 

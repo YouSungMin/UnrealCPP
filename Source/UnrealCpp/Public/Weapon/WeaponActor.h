@@ -25,6 +25,9 @@ protected:
 	UFUNCTION()
 	void OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
+	virtual void OnWeaponActivate(){};
+	virtual void OnWeaponDeActivate(){};
+
 public:	
 	// 무기 자체를 활성화/비활성화 하는 함수
 	UFUNCTION(BlueprintCallable)
@@ -44,7 +47,7 @@ public:
 	
 	// 무기를 획득했을 때 실행되는 함수
 	UFUNCTION(BlueprintCallable)
-	virtual void OnWeaponPickuped();
+	virtual void OnWeaponPickuped(int Count);
 
 	virtual void PostInitializeComponents() override;
 

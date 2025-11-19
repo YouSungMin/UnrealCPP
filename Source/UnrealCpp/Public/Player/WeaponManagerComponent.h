@@ -21,7 +21,8 @@ public:
 	UWeaponManagerComponent();
 
 	AWeaponActor* GetEquippedWeapon(EItemCode InType) const;
-	TSubclassOf<AUsedWeapon> GetUsedWeaponClass(EItemCode InType);
+	TSubclassOf<AUsedWeapon> GetUsedWeaponClass(EItemCode InType) const;
+	TSubclassOf<APickup> GetPickupWeaponClass(EItemCode InType) const;
 
 protected:
 	// Called when the game starts

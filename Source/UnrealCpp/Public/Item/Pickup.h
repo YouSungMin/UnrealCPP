@@ -30,6 +30,8 @@ public:
 
 	// 픽업에 힘을 가해서 날리는 함수
 	void AddImpulse(FVector& Velocity);
+
+	inline void SetPickupCount(int32 InCount){PickupCount = InCount;}
 private:
 	UFUNCTION()
 	void OnTimeLineUpdate(float Value);
@@ -72,6 +74,9 @@ protected:
 	// 픽업 획득 효과용 스케일 커브
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
 	TObjectPtr<UCurveFloat> DistanceCurve = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
+	int32 PickupCount = 1;
 
 	// 스폰 후에 먹을수 있게 될 때까지의 시간
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
