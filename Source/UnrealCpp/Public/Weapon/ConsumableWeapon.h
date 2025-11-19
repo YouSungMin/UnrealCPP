@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Weapon/WeaponActor.h"
+#include "Item/Consumable.h"
 #include "ConsumableWeapon.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponUesEnded);
@@ -18,9 +19,11 @@ class UNREALCPP_API AConsumableWeapon : public AWeaponActor
 public:
 	virtual void OnAttack() override;
 
-	virtual void OnWeaponPickuped(AActionCharacter* InOwner) override;
+	virtual void OnWeaponPickuped() override;
 
 	virtual bool CanAttack()override { return (RemainingUseCount > 0);}
+
+	//virtual FOnConsume& GetOnConsumeDelegate() { return OnWeaponUesEnded;}
 protected:
 	// 최대 사용 횟수
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data");
@@ -31,6 +34,6 @@ protected:
 	int32 RemainingUseCount = 10;
 
 	UPROPERTY(BlueprintAssignable, BlueprintReadWrite, Category = "Weapon");
-	FOnWeaponUesEnded OnWeaponUesEnded;
+	FOnConsume OnWeaponUesEnded;
 
 };

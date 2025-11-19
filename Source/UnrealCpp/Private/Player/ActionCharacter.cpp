@@ -105,6 +105,30 @@ void AActionCharacter::AddItem_Implementation(EItemCode Code)
 	const UEnum* EnumPtr = StaticEnum<EItemCode>();
 	
 	UE_LOG(LogTemp,Log,TEXT("아이템 추가 : %s"), *EnumPtr->GetDisplayNameTextByValue(static_cast<int8>(Code)).ToString());
+	EquipWeapon(Code);
+}
+
+void AActionCharacter::EquipWeapon(EItemCode WeaponCode)
+{
+	if (CurrentWeapon.IsValid())
+	{
+		CurrentWeapon->WeaponActivate(false);
+	}
+
+	CurrentWeapon = WeaponManager->GetEquippedWeapon(WeaponCode);
+	CurrentWeapon->WeaponActivate(true);
+}
+
+void AActionCharacter::DropWeapon(EItemCode WeaponCode)
+{
+	UE_LOG(LogTemp, Log, TEXT("다쓴 무기 버리기"));
+	if (TSubclassOf<AUsedWeapon> usedClass = WeaponManager->GetUsedWeaponClass(WeaponCode))
+	{
+		GetWorld()->SpawnActor<AUsedWeapon>(
+			*usedClass,
+			DropLocation->GetComponentLocation(),
+			GetActorRotation());
+	}
 }
 
 void AActionCharacter::OnAttackEnable(bool bAttackEnable)
@@ -211,7 +235,7 @@ void AActionCharacter::OnAttachMontageEnded(UAnimMontage* Motage, bool bInterrup
 	UE_LOG(LogTemp,Log,TEXT("공격 몽타주가 끝남"));
 	if (CurrentWeapon.IsValid() && !CurrentWeapon->CanAttack())
 	{
-		DropUsedWeapon();
+		DropWeapon(CurrentWeapon->GetWeaponID());
 	}
 }
 
@@ -242,21 +266,6 @@ void AActionCharacter::StandSprintStamina(float DeltaTime)
 	}
 }
 
-void AActionCharacter::DropUsedWeapon()
-{
-	UE_LOG(LogTemp, Log, TEXT("다쓴 무기 버리기"));
-	if (CurrentWeapon.IsValid())
-	{
-		if(TSubclassOf<AUsedWeapon>* usedClass = UsedWeapons.Find(CurrentWeapon->GetWeaponID()))
-		{
-			GetWorld()->SpawnActor<AUsedWeapon>(
-				*usedClass,
-				DropLocation->GetComponentLocation(),
-				GetActorRotation());
-		}
-	}
-}
-
 void AActionCharacter::DropCurrentWeapon()
 {
 	if (CurrentWeapon.IsValid() && CurrentWeapon->GetWeaponID() != EItemCode::BasicWeapon)
@@ -275,7 +284,10 @@ void AActionCharacter::DropCurrentWeapon()
 
 void AActionCharacter::TestDropUsedWeapon()
 {
-	DropUsedWeapon();
+	if (CurrentWeapon.IsValid())
+	{
+		DropWeapon(CurrentWeapon->GetWeaponID());
+	}
 }
 
 void AActionCharacter::TestDropCurrentWeapon()

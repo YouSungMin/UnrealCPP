@@ -49,6 +49,14 @@ public:
 		bComboReady = InSectionJumpNotify != nullptr;
 	}
 
+	// 무기를 장비하는 함수
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void EquipWeapon(EItemCode WeaponCode);
+
+	// 다쓴 무기를 버리는 함수
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void DropWeapon(EItemCode WeaponCode);
+
 	// 노피파이가 공격을 가능하게 만들라는 신호가 왔을 때 실행될 함수
 	void OnAttackEnable(bool bAttackEnable);
 
@@ -86,9 +94,6 @@ private:
 
 	// 달리기 스테미너 소비 함수
 	void StandSprintStamina(float DeltaTime);
-
-	// 사용다한 무기를 버리는 함수
-	void DropUsedWeapon();
 
 	// 사용중이던 무기를 버리는 함수
 	void DropCurrentWeapon();

@@ -9,13 +9,13 @@ void AConsumableWeapon::OnAttack()
 	UE_LOG(LogTemp,Log,TEXT("%d"), RemainingUseCount);
 	if (RemainingUseCount <= 0)
 	{
-		OnWeaponUesEnded.Broadcast();
+		OnWeaponUesEnded.Broadcast(WeaponID);
 	}
 }
 
-void AConsumableWeapon::OnWeaponPickuped(AActionCharacter* InOwner)
+void AConsumableWeapon::OnWeaponPickuped()
 {
-	Super::OnWeaponPickuped(InOwner);
+	Super::OnWeaponPickuped();
 
 	RemainingUseCount = MaxUseCount;
 }

@@ -26,6 +26,10 @@ protected:
 	void OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
 public:	
+	// 무기 자체를 활성화/비활성화 하는 함수
+	UFUNCTION(BlueprintCallable)
+	void WeaponActivate(bool bActivate);
+
 	// 공격을 활성화/비활성화 하는 함수  콜리전 키고 끄기
 	UFUNCTION(BlueprintCallable)
 	void AttackEnable(bool bEnable);
@@ -38,14 +42,15 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	virtual bool CanAttack(){ return true; }
 	
-	// 무기를 획득했을 때 싫
+	// 무기를 획득했을 때 실행되는 함수
 	UFUNCTION(BlueprintCallable)
-	virtual void OnWeaponPickuped(AActionCharacter* InOwner);
+	virtual void OnWeaponPickuped();
 
 	virtual void PostInitializeComponents() override;
 
 	inline EItemCode GetWeaponID() const {return WeaponID;}
 
+	inline void SetWeaponOwner(AActionCharacter* InOwner){ WeaponOwner = InOwner;}
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Componenets")
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh = nullptr;

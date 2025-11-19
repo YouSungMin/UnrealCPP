@@ -53,6 +53,31 @@ void AWeaponActor::OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherAc
 	UGameplayStatics::ApplyDamage(OtherActor,finalDamage,instigator,this,DamageType);
 }
 
+void AWeaponActor::WeaponActivate(bool bActivate)
+{
+	//SetActorHiddenInGame(!bActivate); // 무기는 비지빌리티만 수정
+
+	if (bActivate)
+	{
+		// 무기 활성화
+		AttachToComponent(
+			WeaponOwner->GetMesh(),
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			TEXT("hand_rSocket"));
+		SetActorHiddenInGame(false);
+	}
+	else
+	{
+		// 무기 비활성화
+		SetActorHiddenInGame(true);
+		AttachToComponent(
+			WeaponOwner->GetMesh(),
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			TEXT("root"));
+		SetActorRelativeLocation(FVector(0,0,-10000.0f));
+	}
+}
+
 void AWeaponActor::AttackEnable(bool bEnable)
 {
 	if (bEnable)
@@ -66,9 +91,9 @@ void AWeaponActor::AttackEnable(bool bEnable)
 }
 
 
-void AWeaponActor::OnWeaponPickuped(AActionCharacter* InOwner)
+void AWeaponActor::OnWeaponPickuped()
 {
-	WeaponOwner = InOwner;
+
 }
 
 void AWeaponActor::PostInitializeComponents()
