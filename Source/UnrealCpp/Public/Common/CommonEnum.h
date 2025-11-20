@@ -26,3 +26,11 @@ enum class EBitflag : uint8
     Test4 = 1 << 3, // 8
     Test5 = 1 << 4  // 16
 };
+
+UENUM(BlueprintType)
+enum class EDamageType : uint8
+{
+    Normal UMETA(DisplayName = "무속성"),
+    Fire UMETA(DisplayName = "불속성"),
+    Water UMETA(DisplayName = "물속성")
+};

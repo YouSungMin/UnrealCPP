@@ -37,6 +37,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AttackEnable(bool bEnable);
 
+	// 공격시 이펙트를 활성화/비활성화 하는 함수 
+	UFUNCTION(BlueprintCallable)
+	void EffectActivate(bool bActivate);
+
 	// 공격을 했을 때 실행되어야 할 함수
 	UFUNCTION(BlueprintCallable)
 	virtual void OnAttack(){};
@@ -60,6 +64,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Componenets")
 	TObjectPtr<class UCapsuleComponent> WeaponCollision = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Componenets")
+	TObjectPtr<class UNiagaraComponent> WeaponSlashEffect = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data")
 	EItemCode WeaponID = EItemCode::BasicWeapon;

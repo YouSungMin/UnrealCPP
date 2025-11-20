@@ -147,7 +147,6 @@ void AActionCharacter::OnAttackEnable(bool bAttackEnable)
 	{
 		CurrentWeapon->AttackEnable(bAttackEnable);
 	}
-
 }
 
 void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
@@ -296,6 +295,14 @@ void AActionCharacter::DropCurrentWeapon(EItemCode WeaponCode)
 			FVector velocity = (GetActorForwardVector() + GetActorUpVector()) * 300.0f;
 			pickup->AddImpulse(velocity);
 		}
+	}
+}
+
+void AActionCharacter::OnWeaponEffectActivate(bool bActivate)
+{
+	if (CurrentWeapon.IsValid())
+	{
+		CurrentWeapon->EffectActivate(bActivate);
 	}
 }
 
