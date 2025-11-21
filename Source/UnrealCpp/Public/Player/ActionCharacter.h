@@ -56,7 +56,7 @@ public:
 	// 노피파이가 공격을 가능하게 만들라는 신호가 왔을 때 실행될 함수
 	void OnAttackEnable(bool bAttackEnable);
 
-	// 노피파이가 공격을 가능하게 만들라는 신호가 왔을 때 실행될 함수
+	// 노피파이가 무기의 트레일을 표시하라고 신호가 왔을 때 실행될 함수
 	void OnWeaponEffectActivate(bool bActivate);
 
 	UFUNCTION(BlueprintCallable)

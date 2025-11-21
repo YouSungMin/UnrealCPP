@@ -81,6 +81,10 @@ void AWeaponActor::WeaponActivate(bool bActivate)
 			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
 			TEXT("root"));
 		SetActorRelativeLocation(FVector(0,0,-10000.0f));
+
+		AttackEnable(false);
+		EffectActivate(false);
+
 		OnWeaponDeActivate();
 	}
 }
@@ -101,7 +105,7 @@ void AWeaponActor::EffectActivate(bool bActivate)
 {
 	if (bActivate)
 	{
-		WeaponSlashEffect->Activate();
+		WeaponSlashEffect->Activate(true);
 	}
 	else
 	{
