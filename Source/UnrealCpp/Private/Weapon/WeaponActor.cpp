@@ -7,6 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/StatusComponent.h"
 #include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 AWeaponActor::AWeaponActor()
@@ -108,6 +110,16 @@ void AWeaponActor::DamageToArea()
 		0,					// 그리는 우선순위(0이 제일앞)
 		1.0f				// 선 두께
 	);
+
+	if (AreaAttackEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			AreaAttackEffect,
+			center,
+			WeaponOwner->GetActorRotation()
+			);
+	}
 
 	// 범위로 데미지 주기
 	UGameplayStatics::ApplyRadialDamageWithFalloff(
