@@ -62,6 +62,8 @@ public:
 	// 노피파이가 무기의 트레일을 표시하라고 신호가 왔을 때 실행될 함수
 	void OnAreaAttack();
 
+	void OnAreaAttakCameraShake();
+
 	UFUNCTION(BlueprintCallable)
 	void TestDropUsedWeapon();
 

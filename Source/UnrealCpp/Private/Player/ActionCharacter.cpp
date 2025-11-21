@@ -11,6 +11,7 @@
 #include "Player/ResourceComponent.h"
 #include "Player/StatusComponent.h"
 #include "Player/WeaponManagerComponent.h"
+#include "Player/ActionPlayerController.h"
 #include "Weapon/ConsumableWeapon.h"
 #include "Item/Pickupable.h"
 #include "Item/Pickup.h"
@@ -313,7 +314,26 @@ void AActionCharacter::OnAreaAttack()
 	//UE_LOG(LogTemp,Log,TEXT("AreaAttack"));
 	if (CurrentWeapon.IsValid())
 	{
-		CurrentWeapon->DamageToArea();
+		CurrentWeapon->DamageToArea();	
+	}
+}
+
+void AActionCharacter::OnAreaAttakCameraShake()
+{
+	UE_LOG(LogTemp, Log, TEXT("Notify"));
+
+	if (CurrentWeapon.IsValid())
+	{
+		//TSubclassOf<UCameraShakeBase> ShakeClass = CurrentWeapon->GetAreaAttakCameraShake();
+		if (CurrentWeapon->GetAreaAttakCameraShake())
+		{
+			APlayerController* PC = Cast<APlayerController>(GetController());
+			if (PC)
+			{
+				PC->ClientStartCameraShake(CurrentWeapon->GetAreaAttakCameraShake());
+				UE_LOG(LogTemp, Log, TEXT("Shake"));
+			}
+		}
 	}
 }
 

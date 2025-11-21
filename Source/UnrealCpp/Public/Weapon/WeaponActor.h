@@ -36,7 +36,10 @@ public:
 	// 일정 범위 내의 적에게 데미지를 주는 함수
 	UFUNCTION(BlueprintCallable)
 	void DamageToArea();
-	
+
+	UFUNCTION(BlueprintCallable)
+	TSubclassOf<class UCameraShakeBase>GetAreaAttakCameraShake()const {return AreaAttackCameraShake;}
+
 	// 무기 자체를 활성화/비활성화 하는 함수
 	UFUNCTION(BlueprintCallable)
 	void WeaponActivate(bool bActivate);
@@ -99,6 +102,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Area")
 	TObjectPtr<class UNiagaraSystem> AreaAttackEffect = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Area")
+	TSubclassOf<class UCameraShakeBase> AreaAttackCameraShake = nullptr;
 private:
 	TWeakObjectPtr<AActionCharacter> WeaponOwner = nullptr;
 };
