@@ -2,6 +2,7 @@
 
 
 #include "Weapon/ConsumableWeapon.h"
+#include "Components/SphereComponent.h"
 
 void AConsumableWeapon::OnAttack()
 {

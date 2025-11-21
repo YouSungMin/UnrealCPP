@@ -41,11 +41,16 @@ void AWeaponActor::BeginPlay()
 
 void AWeaponActor::OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
+	DamageToTarget(OtherActor);
+}
+
+void AWeaponActor::DamageToTarget(AActor* InTarget)
+{
 	float finalDamage = Damage;
 	AController* instigator = nullptr;
 	if (WeaponOwner.IsValid())
 	{
-		if(WeaponOwner == OtherActor)
+		if (WeaponOwner == InTarget)
 			return;
 		// 스테이터스 컴포넌트가 있으면 공격력 가져와서 추가하기
 		if (WeaponOwner->GetStatusComponent() != nullptr)
@@ -54,8 +59,71 @@ void AWeaponActor::OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherAc
 		}
 		instigator = WeaponOwner->GetController();
 	}
-	UE_LOG(LogTemp,Log,TEXT("Overlapped : %s"),*OtherActor->GetName());
-	UGameplayStatics::ApplyDamage(OtherActor,finalDamage,instigator,this,DamageType);
+	//UE_LOG(LogTemp, Log, TEXT("Overlapped : %s"), *InTarget->GetName());
+	UGameplayStatics::ApplyDamage(InTarget, finalDamage, instigator, this, DamageType);
+}
+
+void AWeaponActor::DamageToArea()
+{
+	float finalDamage = Damage;
+	AController* instigator = nullptr;
+	if (WeaponOwner.IsValid())
+	{
+		if (WeaponOwner->GetStatusComponent() != nullptr)
+		{
+			finalDamage += WeaponOwner->GetStatusComponent()->GetAttackPower();
+		}
+		instigator = WeaponOwner->GetController();
+	}
+	finalDamage *= 2.0f;
+
+
+	FVector center = FMath::Lerp(
+		WeaponMesh->GetSocketLocation(TEXT("BladeBase")),
+		WeaponMesh->GetSocketLocation(TEXT("BladeTip")),
+		0.5f);
+
+	TArray<AActor*> IgnoreActors = { WeaponOwner.Get(), this};
+
+	// 디버그 정보 그리기
+	DrawDebugSphere(
+		GetWorld(),
+		center,				// 구의 중심점
+		AreaInnerRadius,	// 구의 반지름
+		12,					// 구를 쪼개는 수
+		FColor::Red,		// 색상
+		false,				// 안지워지게 할지
+		DebugDuration,		// 몇초동안 보이게 할지
+		0,					// 그리는 우선순위(0이 제일앞)
+		1.0f				// 선 두께
+	);
+	DrawDebugSphere(
+		GetWorld(),
+		center,				// 구의 중심점
+		AreaOuterRadius,	// 구의 반지름
+		12,					// 구를 쪼개는 수
+		FColor::Green,		// 색상
+		false,				// 안지워지게 할지
+		DebugDuration,		// 몇초동안 보이게 할지
+		0,					// 그리는 우선순위(0이 제일앞)
+		1.0f				// 선 두께
+	);
+
+	// 범위로 데미지 주기
+	UGameplayStatics::ApplyRadialDamageWithFalloff(
+		GetWorld(),
+		finalDamage,
+		Damage,
+		center,
+		AreaInnerRadius,
+		AreaOuterRadius,
+		Falloff,
+		DamageType,
+		IgnoreActors,
+		this,
+		WeaponOwner->GetController(),
+		ECollisionChannel::ECC_Pawn
+		);
 }
 
 void AWeaponActor::WeaponActivate(bool bActivate)

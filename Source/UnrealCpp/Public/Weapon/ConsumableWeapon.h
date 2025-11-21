@@ -17,6 +17,8 @@ class UNREALCPP_API AConsumableWeapon : public AWeaponActor
 	GENERATED_BODY()
 	
 public:
+
+public:
 	virtual void OnAttack() override;
 
 	virtual void OnWeaponPickuped(int InCount) override;
@@ -24,6 +26,7 @@ public:
 	virtual bool CanAttack()override { return (RemainingUseCount > 0);}
 
 	int32 GetRemainingUseCount() const { return RemainingUseCount; }
+
 
 	//virtual FOnConsume& GetOnConsumeDelegate() { return OnWeaponUesEnded;}
 protected:
@@ -41,5 +44,8 @@ protected:
 	// 무기를 다사용했을 때 사용되는 델리게이트 (사용안하는중)
 	UPROPERTY(BlueprintAssignable, BlueprintReadWrite, Category = "Weapon");
 	FOnConsume OnWeaponUesEnded;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Componenets")
+	TObjectPtr<class USphereComponent> AreaDamageCollision = nullptr;
 
 };

@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
 #include "Weapon/WeaponActor.h"
 #include "Player/ResourceComponent.h"
@@ -148,6 +149,7 @@ void AActionCharacter::OnAttackEnable(bool bAttackEnable)
 		CurrentWeapon->AttackEnable(bAttackEnable);
 	}
 }
+
 
 void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 {
@@ -303,6 +305,15 @@ void AActionCharacter::OnWeaponEffectActivate(bool bActivate)
 	if (CurrentWeapon.IsValid())
 	{
 		CurrentWeapon->EffectActivate(bActivate);
+	}
+}
+
+void AActionCharacter::OnAreaAttack()
+{
+	//UE_LOG(LogTemp,Log,TEXT("AreaAttack"));
+	if (CurrentWeapon.IsValid())
+	{
+		CurrentWeapon->DamageToArea();
 	}
 }
 
