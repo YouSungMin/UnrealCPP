@@ -4,18 +4,19 @@
 #include "Enemy/DamagePopupActor.h"
 #include "Widget/DamageWidget.h"
 #include "Components/WidgetComponent.h"
+#include "Framework/DamagePopupSubsystem.h"
 
 // Sets default values
 ADamagePopupActor::ADamagePopupActor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	DamageWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("DamageWidgetComponent"));
 	SetRootComponent(DamageWidgetComponent);
 
 	DamageWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);	// 항상 카메라에 보이도록 스크림 스페이스 기준
-	DamageWidgetComponent->SetDrawAtDesiredSize(true);	
+	DamageWidgetComponent->SetDrawAtDesiredSize(true);
 }
 
 void ADamagePopupActor::PopupActivate(float Damage)
@@ -37,7 +38,21 @@ void ADamagePopupActor::PopupActivate(float Damage)
 
 void ADamagePopupActor::PopupDeactivate()
 {
-	Destroy();
+	if (UWorld* world = GetWorld())
+	{
+		if (UDamagePopupSubsystem* poolSystem = world->GetSubsystem<UDamagePopupSubsystem>())
+		{
+			poolSystem->ReturnToPool(this);
+		}
+		else
+		{
+			Destroy(); // 안전장치
+		}
+	}
+	else
+	{
+		Destroy(); // 안전장치
+	}
 }
 
 void ADamagePopupActor::BeginPlay()

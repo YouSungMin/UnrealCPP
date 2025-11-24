@@ -16,7 +16,6 @@ class UNREALCPP_API AEnemyPawn : public APawn
 public:
 	// Sets default values for this pawn's properties
 	AEnemyPawn();
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -27,6 +26,9 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Pooling")
+	void ReturnToEnemyPool();
 private:
 	UFUNCTION()
 	void OnTakeDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType,
@@ -41,4 +43,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Popup");
 	TSubclassOf<class ADamagePopupActor> DamagePopupClass = nullptr;
+private:
+	UPROPERTY()
+	TObjectPtr<class UEnemyCountSubsystem> EnemyCountSubsystem;
 };
