@@ -13,5 +13,8 @@ void UAnimNotify_AreaAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
 		OwnerCharacter = Cast<AActionCharacter>(MeshComp->GetOwner());
 	}
 
-	OwnerCharacter->OnAreaAttack();
+	if (OwnerCharacter.IsValid())
+	{
+		OwnerCharacter->OnAreaAttack();
+	}
 }

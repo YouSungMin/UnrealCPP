@@ -10,7 +10,7 @@ void UAnimNotify_CameraShake::Notify(USkeletalMeshComponent* MeshComp, UAnimSequ
 	if (!CameraManager.IsValid())
 	{
 		UWorld* world = MeshComp->GetWorld();
-		if (world)
+		if (world && world->GetFirstPlayerController())
 		{
 			CameraManager = world->GetFirstPlayerController()->PlayerCameraManager;
 		}
