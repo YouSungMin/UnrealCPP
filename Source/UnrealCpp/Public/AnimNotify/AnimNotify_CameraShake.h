@@ -14,11 +14,16 @@ class UNREALCPP_API UAnimNotify_CameraShake : public UAnimNotify
 {
 	GENERATED_BODY()
 public:
-	virtual void Notify(USkeletalMeshComponent* MeshComp,
+	virtual void Notify(
+		USkeletalMeshComponent* MeshComp,
 		UAnimSequenceBase* Animation,
-		const FAnimNotifyEventReference& EventReference)override;
+		const FAnimNotifyEventReference& EventReference) override;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data")
+	TSubclassOf<UCameraShakeBase> CameraShake = nullptr;
 
 private:
-	UPROPERTY()
-	TWeakObjectPtr<class AActionCharacter> OwnerCharacter = nullptr;
+	TWeakObjectPtr<APlayerCameraManager> CameraManager = nullptr;
+
 };

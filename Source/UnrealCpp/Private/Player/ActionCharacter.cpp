@@ -318,25 +318,6 @@ void AActionCharacter::OnAreaAttack()
 	}
 }
 
-void AActionCharacter::OnAreaAttakCameraShake()
-{
-	UE_LOG(LogTemp, Log, TEXT("Notify"));
-
-	if (CurrentWeapon.IsValid())
-	{
-		//TSubclassOf<UCameraShakeBase> ShakeClass = CurrentWeapon->GetAreaAttakCameraShake();
-		if (CurrentWeapon->GetAreaAttakCameraShake())
-		{
-			APlayerController* PC = Cast<APlayerController>(GetController());
-			if (PC)
-			{
-				PC->ClientStartCameraShake(CurrentWeapon->GetAreaAttakCameraShake());
-				UE_LOG(LogTemp, Log, TEXT("Shake"));
-			}
-		}
-	}
-}
-
 void AActionCharacter::TestDropUsedWeapon()
 {
 	if (CurrentWeapon.IsValid())

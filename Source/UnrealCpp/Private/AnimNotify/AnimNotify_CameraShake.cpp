@@ -2,15 +2,22 @@
 
 
 #include "AnimNotify/AnimNotify_CameraShake.h"
-#include "Player/ActionCharacter.h"
 
 void UAnimNotify_CameraShake::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
 	Super::Notify(MeshComp, Animation, EventReference);
 
-	if (!OwnerCharacter.IsValid())
+	if (!CameraManager.IsValid())
 	{
-		OwnerCharacter = Cast<AActionCharacter>(MeshComp->GetOwner());
+		UWorld* world = MeshComp->GetWorld();
+		if (world)
+		{
+			CameraManager = world->GetFirstPlayerController()->PlayerCameraManager;
+		}
 	}
-	OwnerCharacter->OnAreaAttakCameraShake();
+
+	if (CameraShake && CameraManager.IsValid())
+	{
+		CameraManager->StartCameraShake(CameraShake);
+	}
 }
