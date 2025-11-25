@@ -9,8 +9,11 @@ UENUM(BlueprintType)
 enum class EItemCode : uint8
 {
     BasicWeapon    UMETA(DisplayName = "기본무기(도끼)"),
-    Sword          UMETA(DisplayName = "대검"),  // Sowrd -> Sword 수정
-    Hammer         UMETA(DisplayName = "망치"),  // Hamer -> Hammer 수정
+    Sword          UMETA(DisplayName = "대검"), 
+    Hammer         UMETA(DisplayName = "망치"), 
+    HealthPotion   UMETA(DisplayName = "HP포션"),
+    StaminaPotion  UMETA(DisplayName = "스태미너포션"),
+    Coin           UMETA(DisplayName = "동전")
 };
 
 /**
