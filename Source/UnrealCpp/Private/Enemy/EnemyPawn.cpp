@@ -5,6 +5,9 @@
 #include "Enemy/DamagePopupActor.h"
 #include "Framework/DamagePopupSubsystem.h"
 #include "Framework/EnemyCountSubsystem.h"
+#include "Player/ResourceComponent.h"
+#include "Data/DropItemData_TableRow.h"
+#include "Item/Pickup.h"
 
 // Sets default values
 AEnemyPawn::AEnemyPawn()
@@ -19,6 +22,7 @@ AEnemyPawn::AEnemyPawn()
 	PopupLocation->SetupAttachment(Mesh);
 	PopupLocation->SetRelativeLocation(FVector(0,0,100));
 
+	Resource = CreateDefaultSubobject<UResourceComponent>(TEXT("Resource"));
 }
 
 // Called when the game starts or when spawned
@@ -26,12 +30,26 @@ void AEnemyPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	OnTakeAnyDamage.AddDynamic(this, &AEnemyPawn::OnTakeDamage);
-	UEnemyCountSubsystem* countSystem = GetWorld()->GetSubsystem<UEnemyCountSubsystem>();
 
-	if (UWorld* World = GetWorld())
+	if (UWorld* world = GetWorld())
 	{
-		EnemyCountSubsystem = World->GetSubsystem<UEnemyCountSubsystem>();
+		if (UEnemyCountSubsystem* enemyCount = world->GetSubsystem<UEnemyCountSubsystem>())
+		{
+			enemyCount->RegistEnemy();
+		}
 	}
+}
+
+void AEnemyPawn::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UWorld* world = GetWorld())
+	{
+		if (UEnemyCountSubsystem* enemyCount = world->GetSubsystem<UEnemyCountSubsystem>())
+		{
+			enemyCount->UnregistEnemy();
+		}
+	}
+	Super::EndPlay(EndPlayReason);
 }
 
 // Called every frame
@@ -48,51 +66,114 @@ void AEnemyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 }
 
-void AEnemyPawn::ReturnToEnemyPool()
-{
-	// 1. 서브시스템이 유효한지 확인
-	if (!EnemyCountSubsystem)
-	{
-		// 만약 캐싱되지 않았다면 다시 찾거나, 그냥 Destroy()를 호출하여 보험을 둡니다.
-		if (UWorld* World = GetWorld())
-		{
-			EnemyCountSubsystem = World->GetSubsystem<UEnemyCountSubsystem>();
-		}
-	}
-
-	// 2. 서브시스템을 통해 자신(this)을 풀로 반환
-	if (EnemyCountSubsystem)
-	{
-		// 이 함수를 호출하면 Subsystem에서 활성 카운트를 줄이고 델리게이트를 발송합니다.
-		EnemyCountSubsystem->ReturnToPool(this);
-
-		// **중요:** 반환 후, 적을 비활성화된 초기 상태로 되돌리는 로직을 추가해야 합니다.
-		// 예: 체력 초기화, 상태 초기화, 이펙트 종료 등
-		// ResetState(); // <- 이런 초기화 함수를 호출해야 합니다.
-	}
-	else
-	{
-		// 최악의 경우 (서브시스템을 찾지 못함), 일반적인 파괴를 수행합니다.
-		Destroy();
-	}
-}
 
 void AEnemyPawn::OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	//GEngine->AddOnScreenDebugMessage();
-	UE_LOG(LogTemp,Log,TEXT("Damage : %.1f"),Damage);
+	if (Resource->IsAlive())
+	{
+		if (!bInvincible || !FMath::IsNearlyEqual(LastDamage,Damage))
+		{
+			UE_LOG(LogTemp,Log,TEXT("Damage : %.1f"),Damage);
 
-	//ADamagePopupActor* actor = GetWorld()->SpawnActor<ADamagePopupActor>(DamagePopupClass,
-	//	PopupLocation->GetComponentToWorld());
-	//if (actor)
+			Resource->AddHealth(-Damage);
+			//ADamagePopupActor* actor = GetWorld()->SpawnActor<ADamagePopupActor>(DamagePopupClass,
+			//	PopupLocation->GetComponentToWorld());
+			//if (actor)
+			//{
+			//	actor->PopupActivate(Damage);
+			//}
+			UDamagePopupSubsystem* popupSystem = GetWorld()->GetSubsystem<UDamagePopupSubsystem>();
+			popupSystem->ShowDamagePopup(Damage, PopupLocation->GetComponentLocation());
+
+			if (Resource->IsAlive())
+			{
+				bInvincible = true;
+				LastDamage = Damage;
+
+				FTimerDelegate resetDelegate = FTimerDelegate::CreateWeakLambda(
+					this,
+					[this]()
+					{
+						bInvincible = false;
+					}); // this가 파괴되면 람다는 더 실행되지 않는다
+
+				GetWorldTimerManager().ClearTimer(InvincibleTimer);
+				GetWorldTimerManager().SetTimer(
+					InvincibleTimer,
+					resetDelegate,
+					0.1f,false);
+			}
+			else
+			{
+				OnDie();
+			}
+		}
+	}
+}
+
+void AEnemyPawn::DropItems()
+{
+	//for (const auto& item : DropItemInfo)
 	//{
-	//	actor->PopupActivate(Damage);
+	//	item.DropRate;
+	//	item.DropItemClass;
 	//}
 
-	UDamagePopupSubsystem* popupSystem =  GetWorld()->GetSubsystem<UDamagePopupSubsystem>();
-	popupSystem->ShowDamagePopup(Damage, PopupLocation->GetComponentLocation());
+	if (DropItemTable)
+	{
+		APickup* pickup = nullptr;
+		TMap<FName, uint8*> RowMap = DropItemTable->GetRowMap();
+		// 다중 드랍
+		//for (const auto& element : RowMap)
+		//{
+		//	FDropItemData_TableRow* row = (FDropItemData_TableRow*)element.Value;
+		//	if(FMath::FRand() <= row->DropRate)
+		//	{
+		//		GetWorld()->SpawnActor<APickup>(
+		//			row->DropItemClass, 
+		//			GetActorLocation() + FVector::UpVector * 200.0f,
+		//			GetActorRotation());
+		//	}
+		//}
 
-	UEnemyCountSubsystem* countSystem = GetWorld()->GetSubsystem<UEnemyCountSubsystem>();
-	ReturnToEnemyPool();
+		// 현재 가중치 사용하는 방식 (한개만 뽑기)
+		float totalWeight = 0.0f;
+		for (const auto& element : RowMap)
+		{
+			FDropItemData_TableRow* row = (FDropItemData_TableRow*)element.Value;
+			totalWeight += row->DropRate;
+		}
+		float randomSelect = FMath::FRandRange(0, totalWeight);
+		float currentWeight = 0.0f;
+		for (const auto& element : RowMap)
+		{
+			FDropItemData_TableRow* row = (FDropItemData_TableRow*)element.Value;
+			currentWeight += row->DropRate;
+			if (randomSelect < currentWeight)
+			{
+				pickup = GetWorld()->SpawnActor<APickup>(
+					row->DropItemClass,
+					GetActorLocation() + FVector::UpVector * 200.0f,
+					GetActorRotation());
+				break;
+			}
+		}
+
+		if (pickup)
+		{
+			UE_LOG(LogTemp,Log,TEXT("Drop Success : %s"),*pickup->GetName());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("Drop empty"));
+		}
+	}
+}
+
+void AEnemyPawn::OnDie()
+{
+	DropItems();
+	Destroy();
 }
 

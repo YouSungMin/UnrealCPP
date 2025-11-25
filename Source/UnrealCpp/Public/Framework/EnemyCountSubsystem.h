@@ -9,10 +9,10 @@
 
 class AEnemyPawn;
 // 1. 적의 수가 변경되었을 때 발송할 델리게이트 선언
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActiveEnemyCountChanged, int32, NewActiveCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyCountChanged, int32, NewCount);
 
 // 2. 적의 수가 0이 되었을 때 발송할 델리게이트 선언
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAllEnemiesDefeated);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAllEnemyClear);
 /**
  * 
  */
@@ -22,30 +22,25 @@ class UNREALCPP_API UEnemyCountSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection)override;
+	virtual void Deinitialize()override;
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy Count")
-	AEnemyPawn* RequestEnemy(const FVector& Location, const FRotator& Rotation);
+	void RegistEnemy();
 
-	void ReturnToPool(AEnemyPawn* ReturnActor);
+	void UnregistEnemy();
 
-	// 5. 현재 활성화된 적의 수를 반환하는 Getter
-	UFUNCTION(BlueprintPure, Category = "EnemyPool")
-	int32 GetActiveEnemyCount() const { return ActiveEnemyCount; }
+	UFUNCTION(BlueprintPure, Category = "Enemy Count")
+	int32 GetCurrentEnemyCount() const { return CurrentEnemyCount; }
 
-	// 6. 델리게이트 노출 (블루프린트 사용 가능)
-	UPROPERTY(BlueprintAssignable, Category = "EnemyPool")
-	FOnActiveEnemyCountChanged OnActiveEnemyCountChanged;
+	// 적 수가 변경되었을 때 실행할 델리게이트
+	UPROPERTY(BlueprintAssignable, Category = "Enemy Count")
+	FOnEnemyCountChanged OnEnemyCountChanged;
 
-	UPROPERTY(BlueprintAssignable, Category = "EnemyPool")
-	FOnAllEnemiesDefeated OnAllEnemiesDefeated;
-protected:
-	UPROPERTY()
-	TSubclassOf<AEnemyPawn> EnemyPawn = nullptr;
+	// 적이 모두 사라졌을 때 실행될 델리게이트
+	UPROPERTY(BlueprintAssignable, Category = "Enemy Count")
+	FOnAllEnemyClear OnAllEnemyClear;
+
 private:
-	UPROPERTY(Transient)
-	TArray<TObjectPtr<AEnemyPawn>> EnemyPool;
 
-	void BroadcastCountChange(int32 Delta);
-
-	int32 ActiveEnemyCount = 0;
+	int32 CurrentEnemyCount = 0;
 };
