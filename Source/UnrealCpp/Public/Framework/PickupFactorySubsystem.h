@@ -16,6 +16,12 @@ class UNREALCPP_API UPickupFactorySubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
 	
+public:
+	virtual void Initialize(FSubsystemCollectionBase& Collection)override;
+
 	UFUNCTION(BlueprintCallable)
-	APickup* SpawnPickup(EItemCode ItemCode, const FVector& Location, const FRotator& Rotation );
+	void SpawnPickup(EItemCode ItemCode, const FVector& Location, const FRotator& Rotation );
+protected:
+	UPROPERTY()
+	TObjectPtr<UDataTable> DataTable = nullptr;
 };

@@ -8,6 +8,7 @@
 #include "Player/ResourceComponent.h"
 #include "Data/DropItemData_TableRow.h"
 #include "Item/Pickup.h"
+#include "Framework/PickupFactorySubsystem.h"
 
 // Sets default values
 AEnemyPawn::AEnemyPawn()

@@ -59,6 +59,8 @@ private:
 	UPROPERTY()
 	TObjectPtr<class UEnemyCountSubsystem> EnemyCountSubsystem;
 
+	UPROPERTY()
+	TObjectPtr<class UPickupFactorySubsystem> PickupFactorySubsystem;
 private:
 	bool bInvincible = false;
 	FTimerHandle InvincibleTimer;
